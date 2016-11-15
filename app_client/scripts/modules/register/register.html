@@ -1,0 +1,30 @@
+<div class="container">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="page-title-container">
+                <h2 class="page-title">Register</h2>
+                <p class="page-subtitle">Already a member? Please <a ui-sref="app.login">log in</a> instead
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <form ng-submit="$ctrl.onSubmit()">
+                <div class="form-group">
+                    <label for="name" class="control-label">Full name</label>
+                    <input type="text" class="form-control" id="name" placeholder="Enter your name" ng-model="$ctrl.credentials.name">
+                </div>
+                <div class="form-group">
+                    <label for="email" class="control-label">Email address</label>
+                    <input type="email" class="form-control" id="email" placeholder="Enter email" ng-model="$ctrl.credentials.email">
+                </div>
+                <div class="form-group">
+                    <label for="password" class="control-label">Password</label>
+                    <input type="password" class="form-control" id="password" placeholder="Password" ng-model="$ctrl.credentials.password">
+                </div>
+                <button type="submit" class="btn btn-raised btn-primary">Register!</button>
+            </form>
+        </div>
+    </div>
+</div>
