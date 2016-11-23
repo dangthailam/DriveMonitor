@@ -1,5 +1,5 @@
 angular.module('driveMonitor')
-    .config(function($stateProvider, $urlRouterProvider) {
+    .config(function ($stateProvider, $urlRouterProvider) {
         $urlRouterProvider.otherwise('/');
 
         $stateProvider.state('app', {
@@ -7,32 +7,40 @@ angular.module('driveMonitor')
             template: "<my-app></my-app>"
         }).state('app.home', {
             url: "/",
-            template: "<home-page></home-page>"
+            template: "<home-page users='users'></home-page>",
+            controller: function ($scope, users) {
+                $scope.users = users;
+            },
+            resolve: {
+                users: function (UserService) {
+                    return UserService.getAllUsers();
+                }
+            }
         }).state('app.login', {
             url: "/login?return",
             template: "<login-page></login-page>"
         }).state('app.register', {
             url: "/register",
             template: "<register-page></register-page>"
-        }).state('app.roles', {
-            url: "/roles",
-            template: "<roles-page></roles-page>",
+        }).state('app.users', {
+            url: "/users",
+            template: "<users-page></users-page>",
             forConnectedUser: true
         }).state('app.profile', {
             url: "/profile",
             template: "<profile-page user='user'></profile-page>",
             forConnectedUser: true,
-            controller: function($scope, user) {
+            controller: function ($scope, user) {
                 $scope.user = user;
             },
             resolve: {
-                user: function(UserService) {
+                user: function (UserService) {
                     return UserService.getLoggedUserInfo();
                 }
             }
         });
-    }).run(function($rootScope, $state, UserService) {
-        $rootScope.$on('$stateChangeStart', function(e, toState, toParams) {
+    }).run(function ($rootScope, $state, UserService) {
+        $rootScope.$on('$stateChangeStart', function (e, toState, toParams) {
             if (toState.forConnectedUser && !UserService.isLoggedIn()) {
                 e.preventDefault();
                 $state.transitionTo('app.login', {

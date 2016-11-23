@@ -3,7 +3,7 @@
 require('./sidebar/sidebar.js');
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components\\index.js","/components")
-},{"./sidebar/sidebar.js":2,"buffer":13,"e/U+97":16}],2:[function(require,module,exports){
+},{"./sidebar/sidebar.js":2,"buffer":14,"e/U+97":17}],2:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function() {
     "use strict";
@@ -27,10 +27,10 @@ require('./sidebar/sidebar.js');
 })();
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components\\sidebar\\sidebar.js","/components\\sidebar")
-},{"buffer":13,"e/U+97":16}],3:[function(require,module,exports){
+},{"buffer":14,"e/U+97":17}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 angular.module('driveMonitor')
-    .config(function($stateProvider, $urlRouterProvider) {
+    .config(function ($stateProvider, $urlRouterProvider) {
         $urlRouterProvider.otherwise('/');
 
         $stateProvider.state('app', {
@@ -38,32 +38,40 @@ angular.module('driveMonitor')
             template: "<my-app></my-app>"
         }).state('app.home', {
             url: "/",
-            template: "<home-page></home-page>"
+            template: "<home-page users='users'></home-page>",
+            controller: function ($scope, users) {
+                $scope.users = users;
+            },
+            resolve: {
+                users: function (UserService) {
+                    return UserService.getAllUsers();
+                }
+            }
         }).state('app.login', {
             url: "/login?return",
             template: "<login-page></login-page>"
         }).state('app.register', {
             url: "/register",
             template: "<register-page></register-page>"
-        }).state('app.roles', {
-            url: "/roles",
-            template: "<roles-page></roles-page>",
+        }).state('app.users', {
+            url: "/users",
+            template: "<users-page></users-page>",
             forConnectedUser: true
         }).state('app.profile', {
             url: "/profile",
             template: "<profile-page user='user'></profile-page>",
             forConnectedUser: true,
-            controller: function($scope, user) {
+            controller: function ($scope, user) {
                 $scope.user = user;
             },
             resolve: {
-                user: function(UserService) {
+                user: function (UserService) {
                     return UserService.getLoggedUserInfo();
                 }
             }
         });
-    }).run(function($rootScope, $state, UserService) {
-        $rootScope.$on('$stateChangeStart', function(e, toState, toParams) {
+    }).run(function ($rootScope, $state, UserService) {
+        $rootScope.$on('$stateChangeStart', function (e, toState, toParams) {
             if (toState.forConnectedUser && !UserService.isLoggedIn()) {
                 e.preventDefault();
                 $state.transitionTo('app.login', {
@@ -79,14 +87,13 @@ require('./modules/index.js');
 require('./features/index.js');
 
 angular.bootstrap(document, ['driveMonitor']);
-
-}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_e69ddde9.js","/")
-},{"./components/index.js":1,"./features/index.js":4,"./modules/index.js":8,"buffer":13,"e/U+97":16}],4:[function(require,module,exports){
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_4a20d8.js","/")
+},{"./components/index.js":1,"./features/index.js":4,"./modules/index.js":8,"buffer":14,"e/U+97":17}],4:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 require('./user/user.service.js');
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\index.js","/features")
-},{"./user/user.service.js":5,"buffer":13,"e/U+97":16}],5:[function(require,module,exports){
+},{"./user/user.service.js":5,"buffer":14,"e/U+97":17}],5:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var userService = function($http, $window, $q) {
     var _currentUser = null;
@@ -148,7 +155,13 @@ var userService = function($http, $window, $q) {
 
     var update = function(user) {
         return $http.patch('/users/' + _currentUser.id, user);
-    }
+    };
+
+    var getAllUsers = function(){
+        return $http.get('/users').then(function(result){
+            return result.data;
+        });
+    };
 
     return {
         currentUser: currentUser,
@@ -159,14 +172,15 @@ var userService = function($http, $window, $q) {
         login: login,
         logout: logout,
         getLoggedUserInfo: getLoggedUserInfo,
-        update: update
+        update: update,
+        getAllUsers: getAllUsers
     };
 };
 
 angular.module('driveMonitor').service('UserService', userService);
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\user\\user.service.js","/features\\user")
-},{"buffer":13,"e/U+97":16}],6:[function(require,module,exports){
+},{"buffer":14,"e/U+97":17}],6:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function() {
     var myApp = {
@@ -188,28 +202,37 @@ angular.module('driveMonitor').service('UserService', userService);
 })();
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\app\\myApp.js","/modules\\app")
-},{"buffer":13,"e/U+97":16}],7:[function(require,module,exports){
+},{"buffer":14,"e/U+97":17}],7:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function() {
     "use strict";
 
     var homePage = {
-        templateUrl: "template/modules/home/home.html"
+        bindings: {
+            users: '<'
+        },
+        templateUrl: "template/modules/home/home.html",
+        controller: function($scope){
+            var self = this;
+
+            console.log(self.users);
+        }
     };
     angular.module('driveMonitor').component('homePage', homePage);
 })();
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\home\\home.js","/modules\\home")
-},{"buffer":13,"e/U+97":16}],8:[function(require,module,exports){
+},{"buffer":14,"e/U+97":17}],8:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 require('./app/myApp.js');
 require('./home/home.js');
 require('./login/login.js');
 require('./register/register.js');
 require('./profile/profile.js');
+require('./users/users.js');
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\index.js","/modules")
-},{"./app/myApp.js":6,"./home/home.js":7,"./login/login.js":9,"./profile/profile.js":10,"./register/register.js":11,"buffer":13,"e/U+97":16}],9:[function(require,module,exports){
+},{"./app/myApp.js":6,"./home/home.js":7,"./login/login.js":9,"./profile/profile.js":10,"./register/register.js":11,"./users/users.js":12,"buffer":14,"e/U+97":17}],9:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function() {
     "use strict";
@@ -247,7 +270,7 @@ require('./profile/profile.js');
 })();
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\login\\login.js","/modules\\login")
-},{"buffer":13,"e/U+97":16}],10:[function(require,module,exports){
+},{"buffer":14,"e/U+97":17}],10:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function() {
     "use strict";
@@ -271,14 +294,14 @@ require('./profile/profile.js');
 })();
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\profile\\profile.js","/modules\\profile")
-},{"buffer":13,"e/U+97":16,"lodash":15}],11:[function(require,module,exports){
+},{"buffer":14,"e/U+97":17,"lodash":16}],11:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-(function() {
+(function () {
     "use strict";
 
     var registerPage = {
         templateUrl: "template/modules/register/register.html",
-        controller: function($location, UserService){
+        controller: function ($scope, $state, UserService) {
             var self = this;
 
             self.credentials = {
@@ -287,9 +310,16 @@ require('./profile/profile.js');
                 password: null
             };
 
-            self.onSubmit = function(){
-                UserService.register(self.credentials).then(function(){
-                    $location.path('/');
+            self.$onInit = function () {
+                if (UserService.isLoggedIn()) {
+                    $state.go('app.home');
+                }
+            }
+
+            self.onSubmit = function () {
+                UserService.register(self.credentials).then(function () {
+                    $scope.$emit('onCheckAuthentication');
+                    $state.go('app.home');
                 });
             }
         }
@@ -297,9 +327,24 @@ require('./profile/profile.js');
 
     angular.module('driveMonitor').component('registerPage', registerPage);
 })();
-
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\register\\register.js","/modules\\register")
-},{"buffer":13,"e/U+97":16}],12:[function(require,module,exports){
+},{"buffer":14,"e/U+97":17}],12:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+(function() {
+    "use strict";
+
+    var usersPage = {
+        templateUrl: "template/modules/users/users.html",
+        controller: function($location, UserService){
+            var self = this;
+        }
+    };
+
+    angular.module('driveMonitor').component('usersPage', usersPage);
+})();
+
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\users\\users.js","/modules\\users")
+},{"buffer":14,"e/U+97":17}],13:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -427,7 +472,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\base64-js\\lib\\b64.js","/..\\..\\node_modules\\base64-js\\lib")
-},{"buffer":13,"e/U+97":16}],13:[function(require,module,exports){
+},{"buffer":14,"e/U+97":17}],14:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!
  * The buffer module from node.js, for the browser.
@@ -1540,7 +1585,7 @@ function assert (test, message) {
 }
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\buffer\\index.js","/..\\..\\node_modules\\buffer")
-},{"base64-js":12,"buffer":13,"e/U+97":16,"ieee754":14}],14:[function(require,module,exports){
+},{"base64-js":13,"buffer":14,"e/U+97":17,"ieee754":15}],15:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
@@ -1628,7 +1673,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 }
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\ieee754\\index.js","/..\\..\\node_modules\\ieee754")
-},{"buffer":13,"e/U+97":16}],15:[function(require,module,exports){
+},{"buffer":14,"e/U+97":17}],16:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /**
  * @license
@@ -1644,7 +1689,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '4.17.1';
+  var VERSION = '4.17.2';
 
   /** Used as the size to enable large array optimizations. */
   var LARGE_ARRAY_SIZE = 200;
@@ -5437,7 +5482,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
             value = baseGet(object, path);
 
         if (predicate(value, path)) {
-          baseSet(result, path, value);
+          baseSet(result, castPath(path, object), value);
         }
       }
       return result;
@@ -5513,14 +5558,8 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
           var previous = index;
           if (isIndex(index)) {
             splice.call(array, index, 1);
-          }
-          else {
-            var path = castPath(index, array),
-                object = parent(array, path);
-
-            if (object != null) {
-              delete object[toKey(last(path))];
-            }
+          } else {
+            baseUnset(array, index);
           }
         }
       }
@@ -5984,8 +6023,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
     function baseUnset(object, path) {
       path = castPath(path, object);
       object = parent(object, path);
-      var key = toKey(last(path));
-      return !(object != null && hasOwnProperty.call(object, key)) || delete object[key];
+      return object == null || delete object[toKey(last(path))];
     }
 
     /**
@@ -12479,14 +12517,10 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
       start = start === undefined ? 0 : nativeMax(toInteger(start), 0);
       return baseRest(function(args) {
         var array = args[start],
-            lastIndex = args.length - 1,
             otherArgs = castSlice(args, 0, start);
 
         if (array) {
           arrayPush(otherArgs, array);
-        }
-        if (start != lastIndex) {
-          arrayPush(otherArgs, castSlice(args, start + 1));
         }
         return apply(func, this, otherArgs);
       });
@@ -15102,16 +15136,16 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
       if (object == null) {
         return result;
       }
-      var bitmask = CLONE_FLAT_FLAG | CLONE_SYMBOLS_FLAG;
+      var isDeep = false;
       paths = arrayMap(paths, function(path) {
         path = castPath(path, object);
-        bitmask |= (path.length > 1 ? CLONE_DEEP_FLAG : 0);
+        isDeep || (isDeep = path.length > 1);
         return path;
       });
-
       copyObject(object, getAllKeysIn(object), result);
-      result = baseClone(result, bitmask);
-
+      if (isDeep) {
+        result = baseClone(result, CLONE_DEEP_FLAG | CLONE_FLAT_FLAG | CLONE_SYMBOLS_FLAG);
+      }
       var length = paths.length;
       while (length--) {
         baseUnset(result, paths[length]);
@@ -15232,8 +15266,8 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 
       // Ensure the loop is entered when path is empty.
       if (!length) {
-        object = undefined;
         length = 1;
+        object = undefined;
       }
       while (++index < length) {
         var value = object == null ? undefined : object[toKey(path[index])];
@@ -18708,7 +18742,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 }.call(this));
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\lodash\\lodash.js","/..\\..\\node_modules\\lodash")
-},{"buffer":13,"e/U+97":16}],16:[function(require,module,exports){
+},{"buffer":14,"e/U+97":17}],17:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 // shim for using process in browser
 
@@ -18775,4 +18809,4 @@ process.chdir = function (dir) {
 };
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\process\\browser.js","/..\\..\\node_modules\\process")
-},{"buffer":13,"e/U+97":16}]},{},[3])
+},{"buffer":14,"e/U+97":17}]},{},[3])

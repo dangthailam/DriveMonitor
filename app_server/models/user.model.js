@@ -17,7 +17,8 @@ var userSchema = new mongoose.Schema({
         number: String,
         street: String,
         city: String,
-        country: String
+        country: String,
+        postal: String
     },
     phone: String,
     birth: Date,

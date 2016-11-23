@@ -1,9 +1,9 @@
-(function() {
+(function () {
     "use strict";
 
     var registerPage = {
         templateUrl: "template/modules/register/register.html",
-        controller: function($location, UserService){
+        controller: function ($scope, $state, UserService) {
             var self = this;
 
             self.credentials = {
@@ -12,9 +12,16 @@
                 password: null
             };
 
-            self.onSubmit = function(){
-                UserService.register(self.credentials).then(function(){
-                    $location.path('/');
+            self.$onInit = function () {
+                if (UserService.isLoggedIn()) {
+                    $state.go('app.home');
+                }
+            }
+
+            self.onSubmit = function () {
+                UserService.register(self.credentials).then(function () {
+                    $scope.$emit('onCheckAuthentication');
+                    $state.go('app.home');
                 });
             }
         }

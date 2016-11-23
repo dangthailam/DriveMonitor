@@ -1,0 +1,23 @@
+body {
+    background-color: #f0f0f0;
+    nav {
+        background-color: #fff;
+    }
+}
+
+.search-form {
+    padding-top: 20px;
+}
+
+.card-deck {
+    display: flex;
+    justify-content: flex-start;
+    flex-flow: row wrap;
+    align-items: stretch;
+}
+
+.card-deck .card {
+    display: block;
+    flex-basis: 33.3%;
+    /* change this value for each breakpoint*/
+}

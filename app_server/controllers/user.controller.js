@@ -1,12 +1,13 @@
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
+var _ = require('lodash');
 
-var create = function(req, res) {
+var create = function (req, res) {
     var user = new User();
     user.name = req.body.name;
     user.email = req.body.email;
     user.setPassword(req.body.password);
-    user.save(function(err) {
+    user.save(function (err) {
         var token;
         token = user.generateJwt();
         res.status(200);
@@ -16,8 +17,8 @@ var create = function(req, res) {
     });
 };
 
-var findById = function(req, res) {
-    User.findById(req.params.userId, function(err, user) {
+var findById = function (req, res) {
+    User.findById(req.params.userId, function (err, user) {
         if (err) {
             res.status(400).json(err);
             return;
@@ -26,23 +27,35 @@ var findById = function(req, res) {
     });
 };
 
-var update = function(req, res) {
-    User.findById(req.params.userId, function(err, user) {
+var all = function (req, res) {
+    User.find({}, function (err, users) {
+        if (err) {
+            res.status(400).json(err);
+            return;
+        }
+        res.status(200).json(_.map(users, function (u) {
+            return u.export();
+        }));
+    });
+}
+
+var update = function (req, res) {
+    User.findById(req.params.userId, function (err, user) {
         if (err) {
             res.status(400).json(err);
             return;
         }
 
         for (var prop in req.body) {
-            user[prop] = req.body[prop];    
+            user[prop] = req.body[prop];
         }
 
-        user.save(function(err) {
+        user.save(function (err) {
             if (err) {
                 res.status(400).json(err);
                 return;
             }
-            res.status(200).json(user.export());
+            res.status(200).json(users.export());
         });
 
     });
@@ -51,5 +64,6 @@ var update = function(req, res) {
 module.exports = {
     create: create,
     findById: findById,
-    update: update
+    update: update,
+    all: all
 };

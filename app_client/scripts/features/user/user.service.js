@@ -58,7 +58,13 @@ var userService = function($http, $window, $q) {
 
     var update = function(user) {
         return $http.patch('/users/' + _currentUser.id, user);
-    }
+    };
+
+    var getAllUsers = function(){
+        return $http.get('/users').then(function(result){
+            return result.data;
+        });
+    };
 
     return {
         currentUser: currentUser,
@@ -69,7 +75,8 @@ var userService = function($http, $window, $q) {
         login: login,
         logout: logout,
         getLoggedUserInfo: getLoggedUserInfo,
-        update: update
+        update: update,
+        getAllUsers: getAllUsers
     };
 };
 
