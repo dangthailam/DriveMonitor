@@ -45,6 +45,10 @@ angular.module('driveMonitor')
         }).state('app.register', {
             url: "/register",
             template: "<register-page></register-page>"
+        }).state('app.roles', {
+            url: "/roles",
+            template: "<roles-page></roles-page>",
+            forConnectedUser: true
         }).state('app.profile', {
             url: "/profile",
             template: "<profile-page user='user'></profile-page>",
@@ -76,7 +80,7 @@ require('./features/index.js');
 
 angular.bootstrap(document, ['driveMonitor']);
 
-}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_ee108860.js","/")
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_e69ddde9.js","/")
 },{"./components/index.js":1,"./features/index.js":4,"./modules/index.js":8,"buffer":13,"e/U+97":16}],4:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 require('./user/user.service.js');
@@ -220,13 +224,19 @@ require('./profile/profile.js');
                 password: null
             };
 
+            self.$onInit = function(){
+                if(UserService.isLoggedIn()){
+                    $state.go('app.profile');
+                }
+            }
+
             self.onSubmit = function() {
                 UserService.login(self.credentials).then(function() {
                     $scope.$emit('onCheckAuthentication');
                     if ($stateParams.return) {
                         $state.go($stateParams.return);
                     } else {
-                        $state.go('app.home');
+                        $state.go('app.profile');
                     }
                 });
             }
@@ -250,7 +260,7 @@ require('./profile/profile.js');
         templateUrl: "template/modules/profile/profile.html",
         controller: function($scope, $window, UserService) {
             var self = this;
-            console.log(self.user);
+            
             self.onSubmit = function() {
                 UserService.update(_.omit(self.user, ['_id', 'email', 'roles', 'created_at', 'updated_at']));
             };

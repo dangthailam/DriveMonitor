@@ -2,6 +2,7 @@ var gulp = require('gulp');
 var concat = require('gulp-concat');
 var browserify = require('gulp-browserify');
 var del = require('del');
+var sass = require('gulp-sass');
 
 gulp.task('default', ['templates', 'css', 'vendor', 'scripts', 'watch']);
 
@@ -20,7 +21,8 @@ gulp.task('templates', function(){
 
 gulp.task('css', function(){
     del(['./Content/style/style.css']);
-    gulp.src(['./app_client/style/bootstrap.css', './app_client/style/*.css'])
+    gulp.src(['./app_client/style/bootstrap.css', './app_client/style/*.css', './app_client/style/*.scss'])
+        .pipe(sass().on('error', sass.logError))
         .pipe(concat('style.css'))
         .pipe(gulp.dest('./Content/style'));
 });

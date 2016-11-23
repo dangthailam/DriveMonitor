@@ -14,6 +14,10 @@ angular.module('driveMonitor')
         }).state('app.register', {
             url: "/register",
             template: "<register-page></register-page>"
+        }).state('app.roles', {
+            url: "/roles",
+            template: "<roles-page></roles-page>",
+            forConnectedUser: true
         }).state('app.profile', {
             url: "/profile",
             template: "<profile-page user='user'></profile-page>",

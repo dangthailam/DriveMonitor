@@ -19,13 +19,13 @@ var userSchema = new mongoose.Schema({
         city: String,
         country: String
     },
-    roles: [String],
     phone: String,
     birth: Date,
     created_at: Date,
     updated_at: Date,
     hash: String,
-    salt: String
+    salt: String,
+    roles: [String]
 });
 
 userSchema.methods.setPassword = function(password) {

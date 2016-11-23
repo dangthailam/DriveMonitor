@@ -11,13 +11,19 @@
                 password: null
             };
 
+            self.$onInit = function(){
+                if(UserService.isLoggedIn()){
+                    $state.go('app.profile');
+                }
+            }
+
             self.onSubmit = function() {
                 UserService.login(self.credentials).then(function() {
                     $scope.$emit('onCheckAuthentication');
                     if ($stateParams.return) {
                         $state.go($stateParams.return);
                     } else {
-                        $state.go('app.home');
+                        $state.go('app.profile');
                     }
                 });
             }
