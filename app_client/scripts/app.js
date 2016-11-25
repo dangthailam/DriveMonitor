@@ -13,7 +13,7 @@ angular.module('driveMonitor')
             },
             resolve: {
                 users: function (UserService) {
-                    return UserService.getAllUsers();
+                    return UserService.getUsers(6);
                 }
             }
         }).state('app.login', {
@@ -22,10 +22,17 @@ angular.module('driveMonitor')
         }).state('app.register', {
             url: "/register",
             template: "<register-page></register-page>"
-        }).state('app.users', {
-            url: "/users",
-            template: "<users-page></users-page>",
-            forConnectedUser: true
+        }).state('app.monitor', {
+            url: "/monitor?userId",
+            template: "<monitor-page user='user'></monitor-page>",
+            controller: function($scope, user){
+                $scope.user = user;
+            },
+            resolve: {
+                user: function($stateParams, UserService){
+                    return UserService.getUser($stateParams.userId);
+                }
+            }
         }).state('app.profile', {
             url: "/profile",
             template: "<profile-page user='user'></profile-page>",

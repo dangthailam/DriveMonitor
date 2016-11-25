@@ -1,21 +1,28 @@
-<nav class="navbar navbar-light">
-    <a class="navbar-brand" ui-sref="app.home">Moniteur de conduite</a>
-    <ul class="nav navbar-nav" ng-if="!$ctrl.isLoggedIn">
-        <li class="nav-item">
-            <a class="nav-link" ui-sref="app.register">S'inscrire</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" ui-sref="app.login">Se connecter</a>
-        </li>
-    </ul>
-    <ul class="nav navbar-nav" ng-if="$ctrl.isLoggedIn">
-        <li class="nav-item">
-            <a class="nav-link" ui-sref="app.profile">Profile</a>
-        </li>
-    </ul>
-    <ul class="nav navbar-nav float-xs-right" ng-if="$ctrl.isLoggedIn">
-        <li class="nav-item">
-            <a class="nav-link" href="#" ng-click="$ctrl.logout()">Logout</a>
-        </li>
-    </ul>
+<nav class="navbar navbar-light" id="navigate">
+    <div>
+        <a class="navbar-brand" ui-sref="app.home">
+            <span>Moniteur de conduite</span>
+        </a>
+        <ul class="nav navbar-nav" ng-if="!$ctrl.isLoggedIn">
+            <li class="nav-item">
+                <a class="nav-link" ui-sref="app.register">S'inscrire</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" ui-sref="app.login">Se connecter</a>
+            </li>
+        </ul>
+        <ul class="nav navbar-nav" ng-if="$ctrl.isLoggedIn">
+            <li class="nav-item">
+                <a class="nav-link" ui-sref="app.profile">Profile</a>
+            </li>
+        </ul>
+        <ul class="nav navbar-nav float-xs-right">
+            <!--<li class="nav-item">
+                <a href="#" class="nav-link"></a>
+            </li>-->
+            <li class="nav-item" ng-if="$ctrl.isLoggedIn">
+                <a class="nav-link" href="#" ng-click="$ctrl.logout()">Logout</a>
+            </li>
+        </ul>
+    </div>
 </nav>

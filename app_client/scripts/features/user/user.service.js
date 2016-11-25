@@ -1,15 +1,16 @@
-var userService = function($http, $window, $q) {
+var userService = function ($http, $window, $q) {
     var _currentUser = null;
 
-    var saveToken = function(token) {
+
+    var saveToken = function (token) {
         $window.localStorage['mean-token'] = token;
     };
 
-    var getToken = function() {
+    var getToken = function () {
         return $window.localStorage['mean-token'];
     };
 
-    var isLoggedIn = function() {
+    var isLoggedIn = function () {
         var token = getToken();
         if (token) {
             var payload = token.split('.')[1];
@@ -28,40 +29,55 @@ var userService = function($http, $window, $q) {
         }
     };
 
-    var currentUser = function() {
+    var currentUser = function () {
         if (isLoggedIn()) {
             return _currentUser;
         }
     };
 
-    var register = function(user) {
-        return $http.post('/users', user).success(function(data) {
+    var register = function (user) {
+        return $http.post('/users', user).success(function (data) {
             saveToken(data.token);
         });
     };
 
-    var login = function(user) {
-        return $http.post('/token', user).success(function(data) {
+    var login = function (user) {
+        return $http.post('/token', user).success(function (data) {
             saveToken(data.token);
         });
     };
 
-    var logout = function() {
+    var logout = function () {
         $window.localStorage.removeItem('mean-token');
     };
 
-    var getLoggedUserInfo = function() {
-        return $http.get('/users/' + _currentUser.id).then(function(result) {
+    var getLoggedUserInfo = function () {
+        return $http.get('/users/' + _currentUser.id).then(function (result) {
             return result.data;
         });
     };
 
-    var update = function(user) {
+    var update = function (user) {
         return $http.patch('/users/' + _currentUser.id, user);
     };
 
-    var getAllUsers = function(){
-        return $http.get('/users').then(function(result){
+    var getUsers = function (quantity) {
+        return $http({
+            url: '/users',
+            method: "GET",
+            params: {
+                quantity: quantity
+            }
+        }).then(function (result) {
+            return result.data;
+        });
+    };
+
+    var getUser = function (userId) {
+        return $http({
+            url: '/users/' + userId,
+            method: "GET"
+        }).then(function (result) {
             return result.data;
         });
     };
@@ -76,7 +92,8 @@ var userService = function($http, $window, $q) {
         logout: logout,
         getLoggedUserInfo: getLoggedUserInfo,
         update: update,
-        getAllUsers: getAllUsers
+        getUsers: getUsers,
+        getUser: getUser
     };
 };
 

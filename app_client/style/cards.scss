@@ -1,0 +1,17 @@
+.card-deck {
+    display: flex;
+    justify-content: flex-start;
+    flex-flow: row wrap;
+    align-items: stretch;
+}
+
+.card-deck .card {
+    display: block;
+    flex-basis: 31%;
+    padding: 10px;
+    margin: 10px;
+}
+
+#home-users .card .card-title {
+    cursor: pointer;
+}

@@ -1,10 +1,17 @@
-var gulp = require('gulp');
-var concat = require('gulp-concat');
-var browserify = require('gulp-browserify');
-var del = require('del');
-var sass = require('gulp-sass');
+const gulp = require('gulp');
+const concat = require('gulp-concat');
+const browserify = require('gulp-browserify');
+const del = require('del');
+const sass = require('gulp-sass');
+const nodemon = require('gulp-nodemon');
 
-gulp.task('default', ['templates', 'css', 'vendor', 'scripts', 'watch']);
+gulp.task('default', ['server', 'templates', 'css', 'vendor', 'scripts', 'watch']);
+
+gulp.task('server', function (cb) {
+    nodemon({
+        script: 'server.js'
+    });
+});
 
 gulp.task('watch', function () {
     gulp.watch('./app_client/scripts/**/*html', ['templates']);
@@ -21,7 +28,7 @@ gulp.task('templates', function () {
 
 gulp.task('css', function () {
     del(['./Content/style/style.css']);
-    gulp.src(['./app_client/style/bootstrap.css', './app_client/style/*.css', './app_client/style/*.scss'])
+    gulp.src(['./app_client/style/*.css', './app_client/style/*.scss'])
         .pipe(sass().on('error', sass.logError))
         .pipe(concat('style.css'))
         .pipe(gulp.dest('./Content/style'));

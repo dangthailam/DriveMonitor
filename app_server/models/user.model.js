@@ -52,7 +52,7 @@ userSchema.methods.generateJwt = function() {
 };
 
 userSchema.methods.export = function() {
-    return _.pick(this, ['email', 'name', 'location', 'birth', 'phone', 'created_at', 'updated_at']);
+    return _.pick(this, ['_id', 'email', 'name', 'location', 'birth', 'phone', 'created_at', 'updated_at']);
 };
 
 userSchema.pre('save', function(next){

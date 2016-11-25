@@ -1,26 +1,31 @@
 <div class="container">
     <div class="row">
-        <div class="col-xs-12">
-            <div class="page-title-container">
-                <h2 class="page-title">Sign In</h2>
-                <p class="page-subtitle">Not a member? Please <a ui-sref="app.register">register</a> instead
-                </p>
+        <div class="col-lg-6 offset-lg-3 connection-form">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="page-title-container">
+                        <h2 class="page-title">Se connecter</h2>
+                        <p class="page-subtitle">Pas encore membre? <a ui-sref="app.register">S'inscrire</a></p>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-xs-12">
-            <form ng-submit="$ctrl.onSubmit()">
-                <div class="form-group">
-                    <label for="email" class="control-label">Email address</label>
-                    <input type="email" class="form-control" id="email" placeholder="Enter email" ng-model="$ctrl.credentials.email">
+            <div class="row">
+                <div class="col-lg-12">
+                    <form ng-submit="$ctrl.onSubmit()">
+                        <div class="form-group">
+                            <label for="email" class="control-label">Email</label>
+                            <input type="email" class="form-control" id="email" placeholder="Votre email" ng-model="$ctrl.credentials.email">
+                        </div>
+                        <div class="form-group">
+                            <label for="password" class="control-label">Mot de passe</label>
+                            <input type="password" class="form-control" id="password" placeholder="Votre mot de passe" ng-model="$ctrl.credentials.password">
+                        </div>
+                        <div class="text-lg-center">
+                            <button type="submit" class="btn btn-raised btn-success">Se connecter</button>
+                        </div>
+                    </form>
                 </div>
-                <div class="form-group">
-                    <label for="password" class="control-label">Password</label>
-                    <input type="password" class="form-control" id="password" placeholder="Password" ng-model="$ctrl.credentials.password">
-                </div>
-                <button type="submit" class="btn btn-raised btn-primary">Sign in!</button>
-            </form>
+            </div>
         </div>
     </div>
 </div>

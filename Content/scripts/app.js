@@ -44,7 +44,7 @@ angular.module('driveMonitor')
             },
             resolve: {
                 users: function (UserService) {
-                    return UserService.getAllUsers();
+                    return UserService.getUsers(6);
                 }
             }
         }).state('app.login', {
@@ -53,10 +53,17 @@ angular.module('driveMonitor')
         }).state('app.register', {
             url: "/register",
             template: "<register-page></register-page>"
-        }).state('app.users', {
-            url: "/users",
-            template: "<users-page></users-page>",
-            forConnectedUser: true
+        }).state('app.monitor', {
+            url: "/monitor?userId",
+            template: "<monitor-page user='user'></monitor-page>",
+            controller: function($scope, user){
+                $scope.user = user;
+            },
+            resolve: {
+                user: function($stateParams, UserService){
+                    return UserService.getUser($stateParams.userId);
+                }
+            }
         }).state('app.profile', {
             url: "/profile",
             template: "<profile-page user='user'></profile-page>",
@@ -87,7 +94,7 @@ require('./modules/index.js');
 require('./features/index.js');
 
 angular.bootstrap(document, ['driveMonitor']);
-}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_4a20d8.js","/")
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_e22e8aac.js","/")
 },{"./components/index.js":1,"./features/index.js":4,"./modules/index.js":8,"buffer":14,"e/U+97":17}],4:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 require('./user/user.service.js');
@@ -95,18 +102,19 @@ require('./user/user.service.js');
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\index.js","/features")
 },{"./user/user.service.js":5,"buffer":14,"e/U+97":17}],5:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-var userService = function($http, $window, $q) {
+var userService = function ($http, $window, $q) {
     var _currentUser = null;
 
-    var saveToken = function(token) {
+
+    var saveToken = function (token) {
         $window.localStorage['mean-token'] = token;
     };
 
-    var getToken = function() {
+    var getToken = function () {
         return $window.localStorage['mean-token'];
     };
 
-    var isLoggedIn = function() {
+    var isLoggedIn = function () {
         var token = getToken();
         if (token) {
             var payload = token.split('.')[1];
@@ -125,40 +133,55 @@ var userService = function($http, $window, $q) {
         }
     };
 
-    var currentUser = function() {
+    var currentUser = function () {
         if (isLoggedIn()) {
             return _currentUser;
         }
     };
 
-    var register = function(user) {
-        return $http.post('/users', user).success(function(data) {
+    var register = function (user) {
+        return $http.post('/users', user).success(function (data) {
             saveToken(data.token);
         });
     };
 
-    var login = function(user) {
-        return $http.post('/token', user).success(function(data) {
+    var login = function (user) {
+        return $http.post('/token', user).success(function (data) {
             saveToken(data.token);
         });
     };
 
-    var logout = function() {
+    var logout = function () {
         $window.localStorage.removeItem('mean-token');
     };
 
-    var getLoggedUserInfo = function() {
-        return $http.get('/users/' + _currentUser.id).then(function(result) {
+    var getLoggedUserInfo = function () {
+        return $http.get('/users/' + _currentUser.id).then(function (result) {
             return result.data;
         });
     };
 
-    var update = function(user) {
+    var update = function (user) {
         return $http.patch('/users/' + _currentUser.id, user);
     };
 
-    var getAllUsers = function(){
-        return $http.get('/users').then(function(result){
+    var getUsers = function (quantity) {
+        return $http({
+            url: '/users',
+            method: "GET",
+            params: {
+                quantity: quantity
+            }
+        }).then(function (result) {
+            return result.data;
+        });
+    };
+
+    var getUser = function (userId) {
+        return $http({
+            url: '/users/' + userId,
+            method: "GET"
+        }).then(function (result) {
             return result.data;
         });
     };
@@ -173,12 +196,12 @@ var userService = function($http, $window, $q) {
         logout: logout,
         getLoggedUserInfo: getLoggedUserInfo,
         update: update,
-        getAllUsers: getAllUsers
+        getUsers: getUsers,
+        getUser: getUser
     };
 };
 
 angular.module('driveMonitor').service('UserService', userService);
-
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\user\\user.service.js","/features\\user")
 },{"buffer":14,"e/U+97":17}],6:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
@@ -214,8 +237,6 @@ angular.module('driveMonitor').service('UserService', userService);
         templateUrl: "template/modules/home/home.html",
         controller: function($scope){
             var self = this;
-
-            console.log(self.users);
         }
     };
     angular.module('driveMonitor').component('homePage', homePage);
@@ -229,10 +250,10 @@ require('./home/home.js');
 require('./login/login.js');
 require('./register/register.js');
 require('./profile/profile.js');
-require('./users/users.js');
+require('./monitor/monitor.js');
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\index.js","/modules")
-},{"./app/myApp.js":6,"./home/home.js":7,"./login/login.js":9,"./profile/profile.js":10,"./register/register.js":11,"./users/users.js":12,"buffer":14,"e/U+97":17}],9:[function(require,module,exports){
+},{"./app/myApp.js":6,"./home/home.js":7,"./login/login.js":9,"./monitor/monitor.js":10,"./profile/profile.js":11,"./register/register.js":12,"buffer":14,"e/U+97":17}],9:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function() {
     "use strict";
@@ -272,6 +293,24 @@ require('./users/users.js');
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\login\\login.js","/modules\\login")
 },{"buffer":14,"e/U+97":17}],10:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+(function () {
+    "use strict";
+
+    var monitorPage = {
+        bindings: {
+            user: '<'
+        },
+        templateUrl: "template/modules/monitor/monitor.html",
+        controller: function ($location, UserService) {
+            var self = this;
+        }
+    };
+
+    angular.module('driveMonitor').component('monitorPage', monitorPage);
+})();
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\monitor\\monitor.js","/modules\\monitor")
+},{"buffer":14,"e/U+97":17}],11:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function() {
     "use strict";
     var _ = require('lodash');
@@ -294,7 +333,7 @@ require('./users/users.js');
 })();
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\profile\\profile.js","/modules\\profile")
-},{"buffer":14,"e/U+97":17,"lodash":16}],11:[function(require,module,exports){
+},{"buffer":14,"e/U+97":17,"lodash":16}],12:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     "use strict";
@@ -328,22 +367,6 @@ require('./users/users.js');
     angular.module('driveMonitor').component('registerPage', registerPage);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\register\\register.js","/modules\\register")
-},{"buffer":14,"e/U+97":17}],12:[function(require,module,exports){
-(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-(function() {
-    "use strict";
-
-    var usersPage = {
-        templateUrl: "template/modules/users/users.html",
-        controller: function($location, UserService){
-            var self = this;
-        }
-    };
-
-    angular.module('driveMonitor').component('usersPage', usersPage);
-})();
-
-}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\users\\users.js","/modules\\users")
 },{"buffer":14,"e/U+97":17}],13:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';

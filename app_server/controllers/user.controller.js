@@ -37,7 +37,7 @@ var all = function (req, res) {
             return u.export();
         }));
     });
-}
+};
 
 var update = function (req, res) {
     User.findById(req.params.userId, function (err, user) {
@@ -61,9 +61,24 @@ var update = function (req, res) {
     });
 };
 
+var getMany = function (req, res) {
+    var quantity = parseInt(req.query.quantity);
+    if (!quantity) return all(req, res);
+    User.find({}).limit(quantity).exec(function (err, users) {
+        if (err) {
+            res.status(400).json(err);
+            return;
+        }
+        res.status(200).json(_.map(users, function (u) {
+            return u.export();
+        }));
+    });
+};
+
 module.exports = {
     create: create,
     findById: findById,
     update: update,
-    all: all
+    all: all,
+    getMany: getMany
 };
