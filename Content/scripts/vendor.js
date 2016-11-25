@@ -7,7 +7,7 @@ jQuery = require('jQuery');
 $ = require('jQuery');
 
 var app = angular.module('driveMonitor', ['ui.router']);
-}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_bd245e09.js","/")
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_6a194784.js","/")
 },{"angular":4,"angular-ui-router":2,"buffer":6,"e/U+97":9,"jQuery":8}],2:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /**

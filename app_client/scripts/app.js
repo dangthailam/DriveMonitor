@@ -23,7 +23,7 @@ angular.module('driveMonitor')
             url: "/register",
             template: "<register-page></register-page>"
         }).state('app.monitor', {
-            url: "/monitor?userId",
+            url: "/monitor/:userId",
             template: "<monitor-page user='user'></monitor-page>",
             controller: function($scope, user){
                 $scope.user = user;

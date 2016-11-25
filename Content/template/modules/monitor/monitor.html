@@ -1,28 +1,46 @@
+<div class="container-fluid" id="form-container-background">
+    <img src="images/search-background.jpg" alt="">
+</div>
 <div class="container" id="monitor-profile-page">
     <div class="row">
-        <div class="col-lg-9" id="monitor-description">
+        <div class="col-lg-10 offset-lg-1 col-md-8 col-sm-12" id="monitor-profile-description">
             <div class="row">
                 <div class="col-lg-2 text-lg-center">
                     <img class="rounded-circle" src="http://media.npr.org/assets/news/2009/10/27/facebook1_sq-17f6f5e06d5742d8c53576f7c13d5cf7158202a9.jpg?s=16"
-                            alt="Card image cap">
+                        alt="Card image cap">
                 </div>
                 <div class="col-lg-10">
                     <div class="row">
-                        <div class="col-lg-9">
-                            <h2>{{ $ctrl.user.name }}</h2>
+                        <div class="col-lg-8">
+                            <h1>{{ $ctrl.user.name }}</h1>
+                            <p>
+                                <i class="fa fa-map-marker" aria-hidden="true"></i>
+                                <span>{{ $ctrl.user.location.city }}, {{ $ctrl.user.location.country }}</span>
+                            </p>
                         </div>
-                        <div class="col-lg-3 float-lg-right">
-                            35€/heure
+                        <div class="col-lg-4">
+                            <button class="btn btn-raised btn-primary btn-block">Réserver un cours</button>
+                            <button class="btn btn-raised btn-default btn-block">Contacter moniteur</button>
                         </div>
-                    </div>
-                    <div class="row">
-                        
                     </div>
                 </div>
             </div>
+            <hr>
+            <div class="row">
+                <div class="col-lg-12">
+                    <p>It is a long established fact that a reader will be distracted by the readable content of a page when
+                        looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution
+                        of letters, as opposed to using 'Content here, content here', making it look like readable English.
+                        Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model
+                        text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various
+                        versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour
+                        and the like).</p>
+                </div>
+            </div>
         </div>
-        <div class="col-lg-3">
+        <!--<div class="col-lg-3 col-md-3 col-sm-12" id="monitor-profile-actions">
             <button class="btn btn-raised btn-primary btn-block">Réserver un cours</button>
-        </div>
+            <button class="btn btn-raised btn-default btn-block">Contacter moniteur</button>
+        </div>-->
     </div>
 </div>

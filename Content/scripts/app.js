@@ -54,7 +54,7 @@ angular.module('driveMonitor')
             url: "/register",
             template: "<register-page></register-page>"
         }).state('app.monitor', {
-            url: "/monitor?userId",
+            url: "/monitor/:userId",
             template: "<monitor-page user='user'></monitor-page>",
             controller: function($scope, user){
                 $scope.user = user;
@@ -94,7 +94,7 @@ require('./modules/index.js');
 require('./features/index.js');
 
 angular.bootstrap(document, ['driveMonitor']);
-}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_e22e8aac.js","/")
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_260c17f9.js","/")
 },{"./components/index.js":1,"./features/index.js":4,"./modules/index.js":8,"buffer":14,"e/U+97":17}],4:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 require('./user/user.service.js');
@@ -1712,7 +1712,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '4.17.2';
+  var VERSION = '4.17.1';
 
   /** Used as the size to enable large array optimizations. */
   var LARGE_ARRAY_SIZE = 200;
@@ -5505,7 +5505,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
             value = baseGet(object, path);
 
         if (predicate(value, path)) {
-          baseSet(result, castPath(path, object), value);
+          baseSet(result, path, value);
         }
       }
       return result;
@@ -5581,8 +5581,14 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
           var previous = index;
           if (isIndex(index)) {
             splice.call(array, index, 1);
-          } else {
-            baseUnset(array, index);
+          }
+          else {
+            var path = castPath(index, array),
+                object = parent(array, path);
+
+            if (object != null) {
+              delete object[toKey(last(path))];
+            }
           }
         }
       }
@@ -6046,7 +6052,8 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
     function baseUnset(object, path) {
       path = castPath(path, object);
       object = parent(object, path);
-      return object == null || delete object[toKey(last(path))];
+      var key = toKey(last(path));
+      return !(object != null && hasOwnProperty.call(object, key)) || delete object[key];
     }
 
     /**
@@ -12540,10 +12547,14 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
       start = start === undefined ? 0 : nativeMax(toInteger(start), 0);
       return baseRest(function(args) {
         var array = args[start],
+            lastIndex = args.length - 1,
             otherArgs = castSlice(args, 0, start);
 
         if (array) {
           arrayPush(otherArgs, array);
+        }
+        if (start != lastIndex) {
+          arrayPush(otherArgs, castSlice(args, start + 1));
         }
         return apply(func, this, otherArgs);
       });
@@ -15159,16 +15170,16 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
       if (object == null) {
         return result;
       }
-      var isDeep = false;
+      var bitmask = CLONE_FLAT_FLAG | CLONE_SYMBOLS_FLAG;
       paths = arrayMap(paths, function(path) {
         path = castPath(path, object);
-        isDeep || (isDeep = path.length > 1);
+        bitmask |= (path.length > 1 ? CLONE_DEEP_FLAG : 0);
         return path;
       });
+
       copyObject(object, getAllKeysIn(object), result);
-      if (isDeep) {
-        result = baseClone(result, CLONE_DEEP_FLAG | CLONE_FLAT_FLAG | CLONE_SYMBOLS_FLAG);
-      }
+      result = baseClone(result, bitmask);
+
       var length = paths.length;
       while (length--) {
         baseUnset(result, paths[length]);
@@ -15289,8 +15300,8 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 
       // Ensure the loop is entered when path is empty.
       if (!length) {
-        length = 1;
         object = undefined;
+        length = 1;
       }
       while (++index < length) {
         var value = object == null ? undefined : object[toKey(path[index])];

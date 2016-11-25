@@ -1,14 +1,15 @@
-#monitor-profile-page{
+#monitor-profile-page {
     padding: 20px;
-
-    #monitor-description{
+    margin-top: -120px;
+    #monitor-profile-description,
+    #monitor-profile-actions {
         padding: 20px;
+        // margin: 0 20px;
         border: 1px solid #ccc;
         background-color: white;
-
-        img{
-            height: 100px;
-            width: 100px;
-        }
+    }
+    img {
+        height: 100px;
+        width: 100px;
     }
 }

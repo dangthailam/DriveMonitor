@@ -5353,23 +5353,35 @@ a.text-gray-dark:focus, a.text-gray-dark:hover {
   background-color: white; }
 
 #monitor-profile-page {
-  padding: 20px; }
-  #monitor-profile-page #monitor-description {
+  padding: 20px;
+  margin-top: -120px; }
+  #monitor-profile-page #monitor-profile-description,
+  #monitor-profile-page #monitor-profile-actions {
     padding: 20px;
     border: 1px solid #ccc;
     background-color: white; }
-    #monitor-profile-page #monitor-description img {
-      height: 100px;
-      width: 100px; }
+  #monitor-profile-page img {
+    height: 100px;
+    width: 100px; }
 
 nav#navigate {
   border-bottom: 1px solid #ccc; }
 
-#search-form-container {
+#form-container-background {
   padding: 100px 40px 80px 40px;
-  background-image: url("../images/search-background.jpg");
-  background-position: 0% 0%;
-  background-size: cover; }
+  position: relative;
+  overflow: hidden; }
+  #form-container-background img {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: auto;
+    opacity: 0.5; }
+  #form-container-background .search-form {
+    padding: 1rem 1rem 0 1rem;
+    background-color: white;
+    border: 1px solid #ccc; }
 
 body {
   background-color: #f0f0f0; }
