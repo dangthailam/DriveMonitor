@@ -15,13 +15,19 @@ var userSchema = new mongoose.Schema({
     },
     location: {
         number: String,
-        street: String,
+        streetType: String,
+        streetName: String,
         city: String,
         country: String,
         postal: String
     },
     phone: String,
-    birth: Date,
+    price: Number,
+    birth: {
+        day: Number,
+        month: Number,
+        year: Number   
+    },
     created_at: Date,
     updated_at: Date,
     hash: String,
@@ -52,7 +58,7 @@ userSchema.methods.generateJwt = function() {
 };
 
 userSchema.methods.export = function() {
-    return _.pick(this, ['_id', 'email', 'name', 'location', 'birth', 'phone', 'created_at', 'updated_at']);
+    return _.omit(this, ['hash', 'salt']);
 };
 
 userSchema.pre('save', function(next){

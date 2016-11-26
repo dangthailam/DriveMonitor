@@ -11,6 +11,7 @@
             var self = this;
             
             self.onSubmit = function() {
+                console.log(_.omit(self.user, ['_id', 'email', 'roles', 'created_at', 'updated_at']));
                 UserService.update(_.omit(self.user, ['_id', 'email', 'roles', 'created_at', 'updated_at']));
             };
         }

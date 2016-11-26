@@ -11,17 +11,14 @@
                 <a class="nav-link" ui-sref="app.login">Se connecter</a>
             </li>
         </ul>
-        <ul class="nav navbar-nav" ng-if="$ctrl.isLoggedIn">
-            <li class="nav-item">
-                <a class="nav-link" ui-sref="app.profile">Profile</a>
-            </li>
-        </ul>
-        <ul class="nav navbar-nav float-xs-right">
-            <!--<li class="nav-item">
-                <a href="#" class="nav-link"></a>
-            </li>-->
-            <li class="nav-item" ng-if="$ctrl.isLoggedIn">
-                <a class="nav-link" href="#" ng-click="$ctrl.logout()">Logout</a>
+        <ul class="nav navbar-nav float-lg-right" ng-if="$ctrl.isLoggedIn">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="supportedContentDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Dropdown</a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="supportedContentDropdown">
+                    <a class="dropdown-item" ui-sref="app.profile">Votre profil</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#" ng-click="$ctrl.logout()">Se déconnecter</a>
+                </div>
             </li>
         </ul>
     </div>

@@ -1,57 +1,89 @@
 <div class="container">
     <div class="row">
-        <div class="col-xs-12">
-            <div class="page-title-container">
-                <h2 class="page-title">Profile</h2>
-                <p class="page-subtitle">
-                    User profile
-                </p>
+        <div class="col-lg-10 offset-lg-1 connection-form">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="page-title-container">
+                        <h2 class="page-title">Profile</h2>
+                        <p class="page-subtitle"></p>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-xs-12">
-            <form ng-submit="$ctrl.onSubmit()">
-                <div class="form-group">
-                    <label for="email" class="control-label">Email address</label>
-                    <input type="email" class="form-control" disabled="disabled" id="email" placeholder="Enter email" ng-model="$ctrl.user.email">
-                </div>
-                <div class="form-group">
-                    <label for="name" class="control-label">Display name</label>
-                    <input type="text" class="form-control" id="name" placeholder="Name" ng-model="$ctrl.user.name">
-                </div>
-                <div class="form-group">
-                    <label for="phone" class="control-label">Phone</label>
-                    <input type="text" class="form-control" id="phone" placeholder="Numero de telephone" ng-model="$ctrl.user.phone">
-                </div>
-                <div class="row">
-                    <div class="col-lg-1">
-                        <div class="form-group">
-                            <label for="number" class="control-label">Numero</label>
-                            <input type="text" class="form-control" id="number" placeholder="N°" ng-model="$ctrl.user.location.number">
+            <div class="row">
+                <div class="col-xs-12">
+                    <form ng-submit="$ctrl.onSubmit()">
+                        <div class="form-group row">
+                            <label for="email" class="col-lg-2 col-form-label">Email</label>
+                            <div class="col-lg-10">
+                                <input type="email" class="form-control" disabled="disabled" id="email" placeholder="Enter email" ng-model="$ctrl.user.email">
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-lg-7">
-                        <div class="form-group">
-                            <label for="street" class="control-label">Rue</label>
-                            <input type="text" class="form-control" id="street" placeholder="Rue" ng-model="$ctrl.user.location.street">
+                        <div class="form-group row">
+                            <label for="name" class="col-lg-2 col-form-label">Nom et prénom</label>
+                            <div class="col-lg-10">
+                                <input type="text" class="form-control" id="name" placeholder="Name" ng-model="$ctrl.user.name">
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-lg-2">
-                        <div class="form-group">
-                            <label for="city" class="control-label">Ville</label>
-                            <input type="text" class="form-control" id="city" placeholder="Ville" ng-model="$ctrl.user.location.city">
+                        <div class="form-group row">
+                            <label for="phone" class="col-lg-2 col-form-label">Phone</label>
+                            <div class="col-lg-10">
+                                <input type="text" class="form-control" id="phone" placeholder="Numero de telephone" ng-model="$ctrl.user.phone">
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-lg-2">
-                        <div class="form-group">
-                            <label for="postal" class="control-label">Code postal</label>
-                            <input type="text" class="form-control" id="postal" placeholder="Code postal" ng-model="$ctrl.user.location.postal">
+                        <div class="form-group row">
+                            <label for="price" class="col-lg-2 col-form-label">Tarif (par heure)</label>
+                            <div class="col-lg-10">
+                                <input type="number" class="form-control" id="price" placeholder="35 euros/h" ng-model="$ctrl.user.price">
+                            </div>
                         </div>
-                    </div>
+                        <fieldset class="form-group">
+                            <legend>Votre adresse</legend>
+                            <div class="form-group row">
+                                <label for="number" class="col-lg-2 col-form-label">Numero</label>
+                                <div class="col-lg-10">
+                                    <input type="text" class="form-control" id="number" placeholder="Numero de votre logement" ng-model="$ctrl.user.location.number">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="streetType" class="col-lg-2 col-form-label">Type de voie</label>
+                                <div class="col-lg-10">
+                                    <input type="text" class="form-control" id="streetType" placeholder="Avenue, rue, boulevard..." ng-model="$ctrl.user.location.streetType">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="street" class="col-lg-2 col-form-label">Nom de voie</label>
+                                <div class="col-lg-10">
+                                    <input type="text" class="form-control" id="street" placeholder="Nom de voie (de la Republique,...)" ng-model="$ctrl.user.location.streetName">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="city" class="col-lg-2 col-form-label">Ville</label>
+                                <div class="col-lg-10">
+                                    <input type="text" class="form-control" id="city" placeholder="Ville" ng-model="$ctrl.user.location.city">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="postal" class="col-lg-2 col-form-label">Code postal</label>
+                                <div class="col-lg-10">
+                                    <input type="text" class="form-control" id="postal" placeholder="Code postal" ng-model="$ctrl.user.location.postal">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="country" class="col-lg-2 col-form-label">Pays</label>
+                                <div class="col-lg-10">
+                                    <select name="country" id="country" class="form-control" ng-model="$ctrl.user.location.country" placeholder="Pays">
+                                    <option value="France">France</option>
+                                    <option value="Allemand">Allemand</option>
+                                </select>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <div class="text-lg-center">
+                            <button type="submit" class="btn btn-raised btn-primary">Update profile</button>
+                        </div>
+                    </form>
                 </div>
-                <button type="submit" class="btn btn-raised btn-primary">Update profile</button>
-            </form>
+            </div>
         </div>
     </div>
 </div>
