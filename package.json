@@ -16,8 +16,7 @@
   "devDependencies": {
     "bootstrap": "^4.0.0-alpha.5",
     "jshint": "^2.9.4",
-    "ng-file-upload": "^12.2.13",
-    "jquery": "^3.1.1"
+    "ng-file-upload": "^12.2.13"
   },
   "dependencies": {
     "gulp": "^3.9.1",
@@ -42,6 +41,7 @@
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
     "require-dir": "^0.3.1",
-    "winston": "^2.3.0"
+    "winston": "^2.3.0",
+    "jQuery": "^3.1.1"
   }
 }
