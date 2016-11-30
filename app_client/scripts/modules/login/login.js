@@ -13,9 +13,9 @@
 
             self.$onInit = function(){
                 if(UserService.isLoggedIn()){
-                    $state.go('app.profile');
+                    $state.go('app.home');
                 }
-            }
+            };
 
             self.onSubmit = function() {
                 UserService.login(self.credentials).then(function() {
@@ -23,7 +23,7 @@
                     if ($stateParams.return) {
                         $state.go($stateParams.return);
                     } else {
-                        $state.go('app.profile');
+                        $state.go('app.home');
                     }
                 });
             }

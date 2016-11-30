@@ -1,6 +1,7 @@
-var mongoose = require('mongoose');
-var User = mongoose.model('User');
-var _ = require('lodash');
+const mongoose = require('mongoose');
+const User = mongoose.model('User');
+const _ = require('lodash');
+const fs = require('fs');
 
 var create = function (req, res) {
     var user = new User();
@@ -74,10 +75,34 @@ var getMany = function (req, res) {
     });
 };
 
+var updateProfilePicture = function (req, res) {
+    User.findById(req.params.userId, function (err, user) {
+        if (err) {
+            res.status(400).json(err);
+            return;
+        }
+
+        var filePath = req.files.file.path;
+
+        user.image.data = fs.readFileSync(filePath);
+        user.image.contentType = req.files.file.type;
+        user.image.fileName = req.files.file.name;
+
+        user.save(function (err) {
+            if (err) {
+                res.status(400).json(err);
+                return;
+            }
+            res.status(200).json(user.export());
+        });
+    });
+};
+
 module.exports = {
     create: create,
     findById: findById,
     update: update,
     all: all,
-    getMany: getMany
+    getMany: getMany,
+    updateProfilePicture: updateProfilePicture
 };

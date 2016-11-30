@@ -13,3 +13,20 @@
         width: 100px;
     }
 }
+
+img.user-avatar-edit {
+    height: 150px;
+    width: 150px;
+}
+
+.cropArea {
+    background: #E4E4E4;
+    overflow: hidden;
+    width: 100%;
+    height: 300px;
+}
+
+.croppedImg {
+    width: 100%;
+    height: 100%;
+}

@@ -5,7 +5,7 @@ require('./sidebar/sidebar.js');
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components\\index.js","/components")
 },{"./sidebar/sidebar.js":2,"buffer":14,"e/U+97":17}],2:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-(function() {
+(function () {
     "use strict";
 
     var sidebar = {
@@ -13,29 +13,54 @@ require('./sidebar/sidebar.js');
             isLoggedIn: '<'
         },
         templateUrl: "template/components/sidebar/sidebar.html",
-        controller: function($scope, UserService) {
+        controller: function ($scope, UserService) {
             var self = this;
 
-            self.logout = function() {
+            self.avatarSrc = 'http://media.npr.org/assets/news/2009/10/27/facebook1_sq-17f6f5e06d5742d8c53576f7c13d5cf7158202a9.jpg?s=16';
+
+            self.$onChanges = function (changes) {
+                if (self.isLoggedIn) {
+                    UserService.getUser(UserService.getCurrentUser()._id).then(function (user) {
+                        UserService.setCurrentUser(user);
+                        if (user.image && user.image.data)
+                            self.avatarSrc = 'data:' + user.image.contentType + ';base64,' + user.image.data;
+                    });
+
+                }
+            };
+
+            self.logout = function () {
                 UserService.logout();
                 $scope.$emit('onCheckAuthentication');
-            }
+            };
         }
     };
 
     angular.module('driveMonitor').component('sideBar', sidebar);
 })();
-
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components\\sidebar\\sidebar.js","/components\\sidebar")
 },{"buffer":14,"e/U+97":17}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var app = angular.module('driveMonitor', ['ui.router', 'ngFileUpload', 'ngImgCrop']);
+
+
 angular.module('driveMonitor')
     .config(function ($stateProvider, $urlRouterProvider) {
         $urlRouterProvider.otherwise('/');
 
         $stateProvider.state('app', {
             abstract: true,
-            template: "<my-app></my-app>"
+            template: "<my-app></my-app>",
+            resolve: {
+                loggedInUser: function (UserService) {
+                    if (UserService.isLoggedIn()) {
+                        return UserService.getUser(UserService.getCurrentUser()._id).then(function (user) {
+                            UserService.setCurrentUser(user);
+                        });
+                    }
+                    return;
+                }
+            }
         }).state('app.home', {
             url: "/",
             template: "<home-page users='users'></home-page>",
@@ -44,7 +69,12 @@ angular.module('driveMonitor')
             },
             resolve: {
                 users: function (UserService) {
-                    return UserService.getUsers(6);
+                    return UserService.getUsers(3).then(function (users) {
+                        _.forEach(users, function (user) {
+                            user.imageUrl = (user.image && user.image.data) ? 'data:' + user.image.contentType + ';base64,' + user.image.data : 'http://media.npr.org/assets/news/2009/10/27/facebook1_sq-17f6f5e06d5742d8c53576f7c13d5cf7158202a9.jpg?s=16';
+                        });
+                        return users;
+                    });
                 }
             }
         }).state('app.login', {
@@ -56,11 +86,11 @@ angular.module('driveMonitor')
         }).state('app.monitor', {
             url: "/monitor/:userId",
             template: "<monitor-page user='user'></monitor-page>",
-            controller: function($scope, user){
+            controller: function ($scope, user) {
                 $scope.user = user;
             },
             resolve: {
-                user: function($stateParams, UserService){
+                user: function ($stateParams, UserService) {
                     return UserService.getUser($stateParams.userId);
                 }
             }
@@ -72,8 +102,8 @@ angular.module('driveMonitor')
                 $scope.user = user;
             },
             resolve: {
-                user: function (UserService) {
-                    return UserService.getLoggedUserInfo();
+                user: function (loggedInUser, UserService) {
+                    return UserService.getUser(UserService.getCurrentUser()._id);
                 }
             }
         });
@@ -94,7 +124,7 @@ require('./modules/index.js');
 require('./features/index.js');
 
 angular.bootstrap(document, ['driveMonitor']);
-}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_29e5d7fb.js","/")
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_6004dfc6.js","/")
 },{"./components/index.js":1,"./features/index.js":4,"./modules/index.js":8,"buffer":14,"e/U+97":17}],4:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 require('./user/user.service.js');
@@ -102,9 +132,8 @@ require('./user/user.service.js');
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\index.js","/features")
 },{"./user/user.service.js":5,"buffer":14,"e/U+97":17}],5:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-var userService = function ($http, $window, $q) {
+var userService = function ($http, $window, $q, Upload) {
     var _currentUser = null;
-
 
     var saveToken = function (token) {
         $window.localStorage['mean-token'] = token;
@@ -114,6 +143,14 @@ var userService = function ($http, $window, $q) {
         return $window.localStorage['mean-token'];
     };
 
+    var setCurrentUser = function (user) {
+        _currentUser = user;
+    };
+
+    var getCurrentUser = function () {
+        return _currentUser;
+    };
+
     var isLoggedIn = function () {
         var token = getToken();
         if (token) {
@@ -121,8 +158,8 @@ var userService = function ($http, $window, $q) {
             payload = $window.atob(payload);
             payload = JSON.parse(payload);
 
-            _currentUser = {
-                id: payload._id,
+            _currentUser = _currentUser || {
+                _id: payload._id,
                 email: payload.email,
                 name: payload.name
             };
@@ -130,12 +167,6 @@ var userService = function ($http, $window, $q) {
             return payload.exp > Date.now() / 1000;
         } else {
             return false;
-        }
-    };
-
-    var currentUser = function () {
-        if (isLoggedIn()) {
-            return _currentUser;
         }
     };
 
@@ -155,14 +186,8 @@ var userService = function ($http, $window, $q) {
         $window.localStorage.removeItem('mean-token');
     };
 
-    var getLoggedUserInfo = function () {
-        return $http.get('/users/' + _currentUser.id).then(function (result) {
-            return result.data;
-        });
-    };
-
-    var update = function (user) {
-        return $http.patch('/users/' + _currentUser.id, user);
+    var update = function (userId, user) {
+        return $http.patch('/users/' + userId, user);
     };
 
     var getUsers = function (quantity) {
@@ -186,18 +211,27 @@ var userService = function ($http, $window, $q) {
         });
     };
 
+    var updateProfilePicture = function (userId, blob) {
+        return Upload.upload({
+            url: '/users/' + userId,
+            method: 'POST',
+            file: blob
+        });
+    };
+
     return {
-        currentUser: currentUser,
         saveToken: saveToken,
         getToken: getToken,
         isLoggedIn: isLoggedIn,
         register: register,
         login: login,
         logout: logout,
-        getLoggedUserInfo: getLoggedUserInfo,
         update: update,
         getUsers: getUsers,
-        getUser: getUser
+        getUser: getUser,
+        setCurrentUser: setCurrentUser,
+        getCurrentUser: getCurrentUser,
+        updateProfilePicture: updateProfilePicture
     };
 };
 
@@ -205,25 +239,26 @@ angular.module('driveMonitor').service('UserService', userService);
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\user\\user.service.js","/features\\user")
 },{"buffer":14,"e/U+97":17}],6:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-(function() {
+(function () {
     var myApp = {
         bindings: {
             isLoggedIn: '<'
         },
         templateUrl: 'template/modules/app/myApp.html',
-        controller: function($scope, UserService) {
+        controller: function ($scope, UserService) {
             var self = this;
-
-            $scope.$on('onCheckAuthentication', function(e) {
+            $scope.$on('onCheckAuthentication', function (e) {
                 self.isLoggedIn = UserService.isLoggedIn();
+                if (self.isLoggedIn) {
+                    
+                }
             });
             self.isLoggedIn = UserService.isLoggedIn();
         }
-    }
+    };
 
     angular.module('driveMonitor').component('myApp', myApp);
 })();
-
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\app\\myApp.js","/modules\\app")
 },{"buffer":14,"e/U+97":17}],7:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
@@ -270,9 +305,9 @@ require('./monitor/monitor.js');
 
             self.$onInit = function(){
                 if(UserService.isLoggedIn()){
-                    $state.go('app.profile');
+                    $state.go('app.home');
                 }
-            }
+            };
 
             self.onSubmit = function() {
                 UserService.login(self.credentials).then(function() {
@@ -280,7 +315,7 @@ require('./monitor/monitor.js');
                     if ($stateParams.return) {
                         $state.go($stateParams.return);
                     } else {
-                        $state.go('app.profile');
+                        $state.go('app.home');
                     }
                 });
             }
@@ -303,6 +338,10 @@ require('./monitor/monitor.js');
         templateUrl: "template/modules/monitor/monitor.html",
         controller: function ($location, UserService) {
             var self = this;
+
+            self.avatarUrl = self.user.image && self.user.image.data ?
+                'data:' + self.user.image.contentType + ';base64,' + self.user.image.data :
+                'http://media.npr.org/assets/news/2009/10/27/facebook1_sq-17f6f5e06d5742d8c53576f7c13d5cf7158202a9.jpg?s=16';
         }
     };
 
@@ -311,7 +350,7 @@ require('./monitor/monitor.js');
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\monitor\\monitor.js","/modules\\monitor")
 },{"buffer":14,"e/U+97":17}],11:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-(function() {
+(function () {
     "use strict";
     var _ = require('lodash');
 
@@ -320,19 +359,36 @@ require('./monitor/monitor.js');
             user: '<'
         },
         templateUrl: "template/modules/profile/profile.html",
-        controller: function($scope, $window, UserService) {
+        controller: function ($scope, $window, $timeout, Upload, UserService) {
             var self = this;
             
-            self.onSubmit = function() {
-                console.log(_.omit(self.user, ['_id', 'email', 'roles', 'created_at', 'updated_at']));
-                UserService.update(_.omit(self.user, ['_id', 'email', 'roles', 'created_at', 'updated_at']));
+            self.avatarUrl = self.user.image && self.user.image.data ?
+                'data:' + self.user.image.contentType + ';base64,' + self.user.image.data :
+                'http://media.npr.org/assets/news/2009/10/27/facebook1_sq-17f6f5e06d5742d8c53576f7c13d5cf7158202a9.jpg?s=16';
+
+            self.onSubmit = function () {
+                UserService.update(self.user._id, _.omit(self.user, ['_id', 'email', 'roles', 'image'])).then(function () {
+                    done();
+                });
             };
+
+            self.upload = function (dataUrl, name) {
+                UserService.updateProfilePicture(self.user._id, Upload.dataUrltoBlob(dataUrl, name)).then(function (response) {
+                    done();
+                });
+            };
+
+            function done() {
+                self.doneSaving = true;
+                $timeout(function () {
+                    self.doneSaving = false;
+                }, 2000);
+            }
         }
     };
 
     angular.module('driveMonitor').component('profilePage', profilePage);
 })();
-
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\profile\\profile.js","/modules\\profile")
 },{"buffer":14,"e/U+97":17,"lodash":16}],12:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
@@ -1713,7 +1769,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '4.17.1';
+  var VERSION = '4.17.2';
 
   /** Used as the size to enable large array optimizations. */
   var LARGE_ARRAY_SIZE = 200;
@@ -5506,7 +5562,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
             value = baseGet(object, path);
 
         if (predicate(value, path)) {
-          baseSet(result, path, value);
+          baseSet(result, castPath(path, object), value);
         }
       }
       return result;
@@ -5582,14 +5638,8 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
           var previous = index;
           if (isIndex(index)) {
             splice.call(array, index, 1);
-          }
-          else {
-            var path = castPath(index, array),
-                object = parent(array, path);
-
-            if (object != null) {
-              delete object[toKey(last(path))];
-            }
+          } else {
+            baseUnset(array, index);
           }
         }
       }
@@ -6053,8 +6103,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
     function baseUnset(object, path) {
       path = castPath(path, object);
       object = parent(object, path);
-      var key = toKey(last(path));
-      return !(object != null && hasOwnProperty.call(object, key)) || delete object[key];
+      return object == null || delete object[toKey(last(path))];
     }
 
     /**
@@ -12548,14 +12597,10 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
       start = start === undefined ? 0 : nativeMax(toInteger(start), 0);
       return baseRest(function(args) {
         var array = args[start],
-            lastIndex = args.length - 1,
             otherArgs = castSlice(args, 0, start);
 
         if (array) {
           arrayPush(otherArgs, array);
-        }
-        if (start != lastIndex) {
-          arrayPush(otherArgs, castSlice(args, start + 1));
         }
         return apply(func, this, otherArgs);
       });
@@ -15171,16 +15216,16 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
       if (object == null) {
         return result;
       }
-      var bitmask = CLONE_FLAT_FLAG | CLONE_SYMBOLS_FLAG;
+      var isDeep = false;
       paths = arrayMap(paths, function(path) {
         path = castPath(path, object);
-        bitmask |= (path.length > 1 ? CLONE_DEEP_FLAG : 0);
+        isDeep || (isDeep = path.length > 1);
         return path;
       });
-
       copyObject(object, getAllKeysIn(object), result);
-      result = baseClone(result, bitmask);
-
+      if (isDeep) {
+        result = baseClone(result, CLONE_DEEP_FLAG | CLONE_FLAT_FLAG | CLONE_SYMBOLS_FLAG);
+      }
       var length = paths.length;
       while (length--) {
         baseUnset(result, paths[length]);
@@ -15301,8 +15346,8 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 
       // Ensure the loop is entered when path is empty.
       if (!length) {
-        object = undefined;
         length = 1;
+        object = undefined;
       }
       while (++index < length) {
         var value = object == null ? undefined : object[toKey(path[index])];

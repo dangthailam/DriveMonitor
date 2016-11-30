@@ -1,5 +1,14 @@
 nav {
     &#navigate {
         border-bottom: 1px solid #ccc;
+
+        a.nav-link.dropdown-toggle{
+            padding: 0;
+        }
+    }
+
+    img.user-avatar{
+        width: 40px;
+        height: 40px;
     }
 }

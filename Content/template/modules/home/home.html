@@ -30,8 +30,7 @@
             <div class="card-deck-wrapper" id="home-users">
                 <div class="card-deck">
                     <div class="card text-lg-center" ng-repeat="user in $ctrl.users">
-                        <img class="card-img-top" src="http://media.npr.org/assets/news/2009/10/27/facebook1_sq-17f6f5e06d5742d8c53576f7c13d5cf7158202a9.jpg?s=16"
-                            alt="Card image cap">
+                        <img class="card-img-top" src="{{user.imageUrl}}" alt="Card image cap">
                         <div class="card-block ">
                             <h4 class="card-title">
                                 <a ui-sref="app.monitor({userId: user._id})">{{ user.name }}</a>

@@ -1,6 +1,5 @@
-var userService = function ($http, $window, $q) {
+var userService = function ($http, $window, $q, Upload) {
     var _currentUser = null;
-
 
     var saveToken = function (token) {
         $window.localStorage['mean-token'] = token;
@@ -10,6 +9,14 @@ var userService = function ($http, $window, $q) {
         return $window.localStorage['mean-token'];
     };
 
+    var setCurrentUser = function (user) {
+        _currentUser = user;
+    };
+
+    var getCurrentUser = function () {
+        return _currentUser;
+    };
+
     var isLoggedIn = function () {
         var token = getToken();
         if (token) {
@@ -17,8 +24,8 @@ var userService = function ($http, $window, $q) {
             payload = $window.atob(payload);
             payload = JSON.parse(payload);
 
-            _currentUser = {
-                id: payload._id,
+            _currentUser = _currentUser || {
+                _id: payload._id,
                 email: payload.email,
                 name: payload.name
             };
@@ -26,12 +33,6 @@ var userService = function ($http, $window, $q) {
             return payload.exp > Date.now() / 1000;
         } else {
             return false;
-        }
-    };
-
-    var currentUser = function () {
-        if (isLoggedIn()) {
-            return _currentUser;
         }
     };
 
@@ -51,14 +52,8 @@ var userService = function ($http, $window, $q) {
         $window.localStorage.removeItem('mean-token');
     };
 
-    var getLoggedUserInfo = function () {
-        return $http.get('/users/' + _currentUser.id).then(function (result) {
-            return result.data;
-        });
-    };
-
-    var update = function (user) {
-        return $http.patch('/users/' + _currentUser.id, user);
+    var update = function (userId, user) {
+        return $http.patch('/users/' + userId, user);
     };
 
     var getUsers = function (quantity) {
@@ -82,18 +77,27 @@ var userService = function ($http, $window, $q) {
         });
     };
 
+    var updateProfilePicture = function (userId, blob) {
+        return Upload.upload({
+            url: '/users/' + userId,
+            method: 'POST',
+            file: blob
+        });
+    };
+
     return {
-        currentUser: currentUser,
         saveToken: saveToken,
         getToken: getToken,
         isLoggedIn: isLoggedIn,
         register: register,
         login: login,
         logout: logout,
-        getLoggedUserInfo: getLoggedUserInfo,
         update: update,
         getUsers: getUsers,
-        getUser: getUser
+        getUser: getUser,
+        setCurrentUser: setCurrentUser,
+        getCurrentUser: getCurrentUser,
+        updateProfilePicture: updateProfilePicture
     };
 };
 

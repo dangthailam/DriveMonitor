@@ -1,10 +1,23 @@
+var app = angular.module('driveMonitor', ['ui.router', 'ngFileUpload', 'ngImgCrop']);
+
+
 angular.module('driveMonitor')
     .config(function ($stateProvider, $urlRouterProvider) {
         $urlRouterProvider.otherwise('/');
 
         $stateProvider.state('app', {
             abstract: true,
-            template: "<my-app></my-app>"
+            template: "<my-app></my-app>",
+            resolve: {
+                loggedInUser: function (UserService) {
+                    if (UserService.isLoggedIn()) {
+                        return UserService.getUser(UserService.getCurrentUser()._id).then(function (user) {
+                            UserService.setCurrentUser(user);
+                        });
+                    }
+                    return;
+                }
+            }
         }).state('app.home', {
             url: "/",
             template: "<home-page users='users'></home-page>",
@@ -13,7 +26,12 @@ angular.module('driveMonitor')
             },
             resolve: {
                 users: function (UserService) {
-                    return UserService.getUsers(6);
+                    return UserService.getUsers(3).then(function (users) {
+                        _.forEach(users, function (user) {
+                            user.imageUrl = (user.image && user.image.data) ? 'data:' + user.image.contentType + ';base64,' + user.image.data : 'http://media.npr.org/assets/news/2009/10/27/facebook1_sq-17f6f5e06d5742d8c53576f7c13d5cf7158202a9.jpg?s=16';
+                        });
+                        return users;
+                    });
                 }
             }
         }).state('app.login', {
@@ -25,11 +43,11 @@ angular.module('driveMonitor')
         }).state('app.monitor', {
             url: "/monitor/:userId",
             template: "<monitor-page user='user'></monitor-page>",
-            controller: function($scope, user){
+            controller: function ($scope, user) {
                 $scope.user = user;
             },
             resolve: {
-                user: function($stateParams, UserService){
+                user: function ($stateParams, UserService) {
                     return UserService.getUser($stateParams.userId);
                 }
             }
@@ -41,8 +59,8 @@ angular.module('driveMonitor')
                 $scope.user = user;
             },
             resolve: {
-                user: function (UserService) {
-                    return UserService.getLoggedUserInfo();
+                user: function (loggedInUser, UserService) {
+                    return UserService.getUser(UserService.getCurrentUser()._id);
                 }
             }
         });

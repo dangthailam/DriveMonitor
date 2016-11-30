@@ -30,9 +30,14 @@ var userSchema = new mongoose.Schema({
     },
     created_at: Date,
     updated_at: Date,
+    roles: [String],
+    image: {
+        data: Buffer,
+        contentType: String,
+        fileName: String
+    },
     hash: String,
-    salt: String,
-    roles: [String]
+    salt: String
 });
 
 userSchema.methods.setPassword = function(password) {
@@ -58,7 +63,7 @@ userSchema.methods.generateJwt = function() {
 };
 
 userSchema.methods.export = function() {
-    return _.omit(this, ['hash', 'salt']);
+    return _.omit(this.toObject(), ['__v', 'created_at', 'updated_at', 'hash', 'salt']);
 };
 
 userSchema.pre('save', function(next){
