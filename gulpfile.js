@@ -5,13 +5,13 @@ const del = require('del');
 const sass = require('gulp-sass');
 const nodemon = require('gulp-nodemon');
 
-gulp.task('default', ['server', 'templates', 'css', 'vendor', 'scripts', 'watch']);
+gulp.task('default', ['templates', 'css', 'vendor', 'scripts', 'watch']);
 
-gulp.task('server', function (cb) {
-    nodemon({
-        script: 'server.js'
-    });
-});
+// gulp.task('server', function (cb) {
+//     nodemon({
+//         script: 'server.js'
+//     });
+// });
 
 gulp.task('watch', function () {
     gulp.watch('./app_client/scripts/**/*html', ['templates']);
