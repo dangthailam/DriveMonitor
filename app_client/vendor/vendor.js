@@ -1,6 +1,6 @@
 require('angular');
 require('angular-ui-router');
 
-jQuery = require('jQuery');
-$ = require('jQuery');
+jQuery = require('jquery');
+$ = require('jquery');
 _ = require('lodash');
