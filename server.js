@@ -46,8 +46,10 @@ app.use(passport.session());
 app.use(function (req, res) {
   res.sendFile(__dirname + '/index.html');
 });
+var port = process.env.PORT || 8080;
 
-app.listen(8080);
-console.log('App listen at port: 8080');
+app.listen(port, function () {
+  console.log('Our app is running on http://localhost:' + port);
+});
 
 module.exports = app;
