@@ -11,7 +11,7 @@
             </div>
             <div class="row">
                 <div class="col-xs-12">
-                    <form ng-submit="$ctrl.onSubmit()">
+                    <form>
                         <div class="form-group">
                             <label for="email" class="control-label">Nom et prénom</label>
                             <input type="text" class="form-control" id="name" placeholder="Votre nom et prénom" ng-model="$ctrl.credentials.name">
@@ -25,7 +25,8 @@
                             <input type="password" class="form-control" id="password" placeholder="Au moins 6 caractères" ng-model="$ctrl.credentials.password">
                         </div>
                         <div class="text-lg-center">
-                            <button type="submit" class="btn btn-raised btn-primary">S'incrire</button>
+                            <button type="button" ng-click="$ctrl.registerAsStudent()" class="btn btn-raised btn-primary">Je recherche un moniteur</button>
+                            <button type="button" ng-click="$ctrl.registerAsMonitor()" class="btn btn-raised btn-primary">Je donne des cours</button>
                         </div>
                     </form>
                 </div>

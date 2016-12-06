@@ -50,12 +50,6 @@
                                             <input type="text" class="form-control" id="phone" placeholder="Numero de telephone" ng-model="$ctrl.user.phone">
                                         </div>
                                     </div>
-                                    <div class="form-group row">
-                                        <label for="price" class="col-lg-3 col-form-label">Tarif (par heure)</label>
-                                        <div class="col-lg-9">
-                                            <input type="number" class="form-control" id="price" placeholder="35 euros/h" ng-model="$ctrl.user.price">
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </fieldset>
@@ -63,21 +57,9 @@
                         <fieldset class="form-group">
                             <legend>Votre adresse</legend>
                             <div class="form-group row">
-                                <label for="number" class="col-lg-2 col-form-label">Numero</label>
+                                <label for="number" class="col-lg-2 col-form-label">Adresse</label>
                                 <div class="col-lg-10">
-                                    <input type="text" class="form-control" id="number" placeholder="Numero de votre logement" ng-model="$ctrl.user.location.number">
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label for="streetType" class="col-lg-2 col-form-label">Type de voie</label>
-                                <div class="col-lg-10">
-                                    <input type="text" class="form-control" id="streetType" placeholder="Avenue, rue, boulevard..." ng-model="$ctrl.user.location.streetType">
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label for="street" class="col-lg-2 col-form-label">Nom de voie</label>
-                                <div class="col-lg-10">
-                                    <input type="text" class="form-control" id="street" placeholder="Nom de voie (de la Republique,...)" ng-model="$ctrl.user.location.streetName">
+                                    <input type="text" class="form-control" id="number" placeholder="Numero de votre logement" ng-model="$ctrl.user.location.address">
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -90,15 +72,6 @@
                                 <label for="postal" class="col-lg-2 col-form-label">Code postal</label>
                                 <div class="col-lg-10">
                                     <input type="text" class="form-control" id="postal" placeholder="Code postal" ng-model="$ctrl.user.location.postal">
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label for="country" class="col-lg-2 col-form-label">Pays</label>
-                                <div class="col-lg-10">
-                                    <select name="country" id="country" class="form-control" ng-model="$ctrl.user.location.country" placeholder="Pays">
-                                    <option value="France">France</option>
-                                    <option value="Allemand">Allemand</option>
-                                </select>
                                 </div>
                             </div>
                         </fieldset>

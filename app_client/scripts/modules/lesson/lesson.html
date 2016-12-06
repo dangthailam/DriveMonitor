@@ -1,0 +1,52 @@
+<div class="container">
+    <div class="row">
+        <div class="col-lg-10 offset-lg-1 connection-form">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="page-title-container">
+                        <h2 class="page-title">Donnez votre cours de conduite</h2>
+                        <p class="page-subtitle"></p>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-xs-12">
+                    <form ng-submit="$ctrl.onSubmit()">
+                        <div class="form-group">
+                            <label for="email" class="control-label">Titre de l'annonce</label>
+                            <input type="text" class="form-control" id="name" placeholder="Moniteur 5 ans d'expérience donne le cours de conduite" ng-model="$ctrl.user.announcement.title">
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="control-label">Description</label>
+                            <textarea class="form-control" rows="4" id="email" placeholder="Description de votre annonce" ng-model="$ctrl.user.announcement.description"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="control-label">Tarif</label>
+                            <input type="text" class="form-control" id="name" placeholder="30€ de l'heure" ng-model="$ctrl.user.announcement.rate">
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="control-label">Numéro de téléphone</label>
+                            <input type="text" class="form-control" id="name" placeholder="Numéro de téléphone" ng-model="$ctrl.user.phone">
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="control-label">Adresse</label>
+                            <input type="text" class="form-control" id="name" placeholder="Adresse où vous donnez le cours" ng-model="$ctrl.user.announcement.address">
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="control-label">Ville</label>
+                            <input type="text" class="form-control" id="name" placeholder="Paris" ng-model="$ctrl.user.announcement.city">
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="control-label">Code postal</label>
+                            <input type="text" class="form-control" id="name" placeholder="75016" ng-model="$ctrl.user.announcement.postal">
+                        </div>
+                        <div class="text-lg-center">
+                            <button type="submit" class="btn btn-raised btn-primary">Valider</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

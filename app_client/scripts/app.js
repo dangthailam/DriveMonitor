@@ -7,12 +7,16 @@ angular.module('driveMonitor')
 
         $stateProvider.state('app', {
             abstract: true,
-            template: "<my-app></my-app>",
+            template: "<my-app logged-in-user='user'></my-app>",
+            controller: function ($scope, loggedInUser) {
+                $scope.user = loggedInUser;
+            },
             resolve: {
-                loggedInUser: function (UserService) {
-                    if (UserService.isLoggedIn()) {
-                        return UserService.getUser(UserService.getCurrentUser()._id).then(function (user) {
-                            UserService.setCurrentUser(user);
+                loggedInUser: function (AuthenticationService, UserService) {
+                    if (AuthenticationService.isLoggedIn()) {
+                        return UserService.getUser(AuthenticationService.getCurrentUser()._id).then(function (user) {
+                            AuthenticationService.setCurrentUser(user);
+                            return user;
                         });
                     }
                     return;
@@ -26,7 +30,7 @@ angular.module('driveMonitor')
             },
             resolve: {
                 users: function (UserService) {
-                    return UserService.getUsers(3).then(function (users) {
+                    return UserService.getUsers(3, true).then(function (users) {
                         _.forEach(users, function (user) {
                             user.imageUrl = (user.image && user.image.data) ? 'data:' + user.image.contentType + ';base64,' + user.image.data : 'http://media.npr.org/assets/news/2009/10/27/facebook1_sq-17f6f5e06d5742d8c53576f7c13d5cf7158202a9.jpg?s=16';
                         });
@@ -55,22 +59,30 @@ angular.module('driveMonitor')
             url: "/profile",
             template: "<profile-page user='user'></profile-page>",
             forConnectedUser: true,
-            controller: function ($scope, user) {
-                $scope.user = user;
-            },
-            resolve: {
-                user: function (loggedInUser, UserService) {
-                    return UserService.getUser(UserService.getCurrentUser()._id);
-                }
+            controller: function ($scope, loggedInUser) {
+                $scope.user = loggedInUser;
+            }
+        }).state('app.lesson', {
+            url: "/annonce",
+            template: '<lesson-page user="user"></lesson-page>',
+            forConnectedUser: true,
+            controller: function ($scope, loggedInUser) {
+                $scope.user = loggedInUser;
             }
         });
-    }).run(function ($rootScope, $state, UserService) {
+    }).run(function ($rootScope, $state, AuthenticationService) {
         $rootScope.$on('$stateChangeStart', function (e, toState, toParams) {
-            if (toState.forConnectedUser && !UserService.isLoggedIn()) {
+            var isLoggedIn = AuthenticationService.isLoggedIn();
+            if (toState.forConnectedUser && !isLoggedIn) {
                 e.preventDefault();
                 $state.transitionTo('app.login', {
                     return: 'app.profile'
                 });
+            }
+
+            if (toState.name == "app.lesson" && !isLoggedIn) {
+                e.preventDefault();
+                $state.transitionTo('app.register');
             }
         });
     });

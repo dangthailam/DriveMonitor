@@ -63,8 +63,14 @@ var update = function (req, res) {
 
 var getMany = function (req, res) {
     var quantity = parseInt(req.query.quantity);
+
     if (!quantity) return all(req, res);
-    User.find({}).limit(quantity).exec(function (err, users) {
+
+    var isMonitor = req.query.isMonitor;
+    
+    User.find({
+        'isMonitor': isMonitor
+    }).limit(quantity).exec(function (err, users) {
         if (err) {
             res.status(400).json(err);
             return;

@@ -3,16 +3,19 @@
         <a class="navbar-brand" ui-sref="app.home">
             <span>Moniteur de conduite</span>
         </a>
-        <ul class="nav navbar-nav float-lg-right" ng-if="!$ctrl.isLoggedIn">
+        <ul class="nav navbar-nav" ng-if="!$ctrl.isLoggedIn">
             <li class="nav-item">
-                <a class="btn btn-primary" ui-sref="app.register">S'inscrire</a>
+                <a class="nav-link" ui-sref="app.register">S'inscrire</a>
             </li>
             <li class="nav-item">
-                <a class="btn btn-success" ui-sref="app.login">Se connecter</a>
+                <a class="nav-link" ui-sref="app.login">Se connecter</a>
             </li>
         </ul>
-        <ul class="nav navbar-nav float-lg-right" ng-if="$ctrl.isLoggedIn">
-            <li class="nav-item dropdown">
+        <ul class="nav navbar-nav float-lg-right">
+            <li class="nav-item">
+                <a class="btn btn-primary" ui-sref="app.lesson">Donner des cours</a>
+            </li>
+            <li class="nav-item dropdown" ng-if="$ctrl.isLoggedIn">
                 <a class="nav-link dropdown-toggle" href="#" id="supportedContentDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <img class="user-avatar rounded-circle" src="{{$ctrl.avatarSrc}}" alt="">
                 </a>

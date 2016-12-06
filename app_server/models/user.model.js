@@ -14,27 +14,31 @@ var userSchema = new mongoose.Schema({
         required: true
     },
     location: {
-        number: String,
-        streetType: String,
-        streetName: String,
+        address: String,
         city: String,
-        country: String,
         postal: String
     },
     phone: String,
-    price: Number,
     birth: {
         day: Number,
         month: Number,
-        year: Number   
+        year: Number
     },
     created_at: Date,
     updated_at: Date,
-    roles: [String],
     image: {
         data: Buffer,
         contentType: String,
         fileName: String
+    },
+    isMonitor: Boolean,
+    announcement: {
+        title: String,
+        description: String,
+        rate: String,
+        address: String,
+        city: String,
+        postal: String
     },
     hash: String,
     salt: String

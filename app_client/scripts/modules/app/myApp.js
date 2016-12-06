@@ -1,18 +1,16 @@
 (function () {
     var myApp = {
         bindings: {
-            isLoggedIn: '<'
+            isLoggedIn: '<',
+            loggedInUser: '<'
         },
         templateUrl: 'template/modules/app/myApp.html',
-        controller: function ($scope, UserService) {
+        controller: function ($scope, AuthenticationService) {
             var self = this;
             $scope.$on('onCheckAuthentication', function (e) {
-                self.isLoggedIn = UserService.isLoggedIn();
-                if (self.isLoggedIn) {
-                    
-                }
+                self.isLoggedIn = AuthenticationService.isLoggedIn();
             });
-            self.isLoggedIn = UserService.isLoggedIn();
+            self.isLoggedIn = AuthenticationService.isLoggedIn();
         }
     };
 

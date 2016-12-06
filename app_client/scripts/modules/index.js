@@ -4,3 +4,4 @@ require('./login/login.js');
 require('./register/register.js');
 require('./profile/profile.js');
 require('./monitor/monitor.js');
+require('./lesson/lesson.js');

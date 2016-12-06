@@ -3,34 +3,30 @@
 require('./sidebar/sidebar.js');
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components\\index.js","/components")
-},{"./sidebar/sidebar.js":2,"buffer":14,"e/U+97":17}],2:[function(require,module,exports){
+},{"./sidebar/sidebar.js":2,"buffer":16,"e/U+97":19}],2:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     "use strict";
 
     var sidebar = {
         bindings: {
-            isLoggedIn: '<'
+            isLoggedIn: '<',
+            loggedInUser: '<'
         },
         templateUrl: "template/components/sidebar/sidebar.html",
-        controller: function ($scope, UserService) {
+        controller: function ($scope, AuthenticationService) {
             var self = this;
 
             self.avatarSrc = 'http://media.npr.org/assets/news/2009/10/27/facebook1_sq-17f6f5e06d5742d8c53576f7c13d5cf7158202a9.jpg?s=16';
 
             self.$onChanges = function (changes) {
-                if (self.isLoggedIn) {
-                    UserService.getUser(UserService.getCurrentUser()._id).then(function (user) {
-                        UserService.setCurrentUser(user);
-                        if (user.image && user.image.data)
-                            self.avatarSrc = 'data:' + user.image.contentType + ';base64,' + user.image.data;
-                    });
-
+                if (self.isLoggedIn && self.loggedInUser.image && self.loggedInUser.image.data) {
+                    self.avatarSrc = 'data:' + self.loggedInUser.image.contentType + ';base64,' + self.loggedInUser.image.data;
                 }
             };
 
             self.logout = function () {
-                UserService.logout();
+                AuthenticationService.logout();
                 $scope.$emit('onCheckAuthentication');
             };
         }
@@ -39,7 +35,7 @@ require('./sidebar/sidebar.js');
     angular.module('driveMonitor').component('sideBar', sidebar);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components\\sidebar\\sidebar.js","/components\\sidebar")
-},{"buffer":14,"e/U+97":17}],3:[function(require,module,exports){
+},{"buffer":16,"e/U+97":19}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var app = angular.module('driveMonitor', ['ui.router', 'ngFileUpload', 'ngImgCrop']);
 
@@ -50,12 +46,16 @@ angular.module('driveMonitor')
 
         $stateProvider.state('app', {
             abstract: true,
-            template: "<my-app></my-app>",
+            template: "<my-app logged-in-user='user'></my-app>",
+            controller: function ($scope, loggedInUser) {
+                $scope.user = loggedInUser;
+            },
             resolve: {
-                loggedInUser: function (UserService) {
-                    if (UserService.isLoggedIn()) {
-                        return UserService.getUser(UserService.getCurrentUser()._id).then(function (user) {
-                            UserService.setCurrentUser(user);
+                loggedInUser: function (AuthenticationService, UserService) {
+                    if (AuthenticationService.isLoggedIn()) {
+                        return UserService.getUser(AuthenticationService.getCurrentUser()._id).then(function (user) {
+                            AuthenticationService.setCurrentUser(user);
+                            return user;
                         });
                     }
                     return;
@@ -69,7 +69,7 @@ angular.module('driveMonitor')
             },
             resolve: {
                 users: function (UserService) {
-                    return UserService.getUsers(3).then(function (users) {
+                    return UserService.getUsers(3, true).then(function (users) {
                         _.forEach(users, function (user) {
                             user.imageUrl = (user.image && user.image.data) ? 'data:' + user.image.contentType + ';base64,' + user.image.data : 'http://media.npr.org/assets/news/2009/10/27/facebook1_sq-17f6f5e06d5742d8c53576f7c13d5cf7158202a9.jpg?s=16';
                         });
@@ -98,22 +98,30 @@ angular.module('driveMonitor')
             url: "/profile",
             template: "<profile-page user='user'></profile-page>",
             forConnectedUser: true,
-            controller: function ($scope, user) {
-                $scope.user = user;
-            },
-            resolve: {
-                user: function (loggedInUser, UserService) {
-                    return UserService.getUser(UserService.getCurrentUser()._id);
-                }
+            controller: function ($scope, loggedInUser) {
+                $scope.user = loggedInUser;
+            }
+        }).state('app.lesson', {
+            url: "/annonce",
+            template: '<lesson-page user="user"></lesson-page>',
+            forConnectedUser: true,
+            controller: function ($scope, loggedInUser) {
+                $scope.user = loggedInUser;
             }
         });
-    }).run(function ($rootScope, $state, UserService) {
+    }).run(function ($rootScope, $state, AuthenticationService) {
         $rootScope.$on('$stateChangeStart', function (e, toState, toParams) {
-            if (toState.forConnectedUser && !UserService.isLoggedIn()) {
+            var isLoggedIn = AuthenticationService.isLoggedIn();
+            if (toState.forConnectedUser && !isLoggedIn) {
                 e.preventDefault();
                 $state.transitionTo('app.login', {
                     return: 'app.profile'
                 });
+            }
+
+            if (toState.name == "app.lesson" && !isLoggedIn) {
+                e.preventDefault();
+                $state.transitionTo('app.register');
             }
         });
     });
@@ -124,143 +132,157 @@ require('./modules/index.js');
 require('./features/index.js');
 
 angular.bootstrap(document, ['driveMonitor']);
-}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_ee730533.js","/")
-},{"./components/index.js":1,"./features/index.js":4,"./modules/index.js":8,"buffer":14,"e/U+97":17}],4:[function(require,module,exports){
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_42a640d5.js","/")
+},{"./components/index.js":1,"./features/index.js":5,"./modules/index.js":9,"buffer":16,"e/U+97":19}],4:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+(function () {
+    var authenticationService = function ($http, $window) {
+        var _currentUser = null;
+
+        var saveToken = function (token) {
+            $window.localStorage['mean-token'] = token;
+        };
+
+        var getToken = function () {
+            return $window.localStorage['mean-token'];
+        };
+
+        var setCurrentUser = function (user) {
+            _currentUser = user;
+        };
+
+        var getCurrentUser = function () {
+            return _currentUser;
+        };
+
+        var isLoggedIn = function () {
+            var token = getToken();
+            if (token) {
+                var payload = token.split('.')[1];
+                payload = $window.atob(payload);
+                payload = JSON.parse(payload);
+
+                _currentUser = _currentUser || {
+                    _id: payload._id,
+                    email: payload.email,
+                    name: payload.name
+                };
+
+                return payload.exp > Date.now() / 1000;
+            } else {
+                return false;
+            }
+        };
+
+        var register = function (user) {
+            return $http.post('/users', user).success(function (data) {
+                saveToken(data.token);
+            });
+        };
+
+        var login = function (user) {
+            return $http.post('/token', user).success(function (data) {
+                saveToken(data.token);
+            });
+        };
+
+        var logout = function () {
+            $window.localStorage.removeItem('mean-token');
+        };
+
+        return {
+            saveToken: saveToken,
+            getToken: getToken,
+            isLoggedIn: isLoggedIn,
+            register: register,
+            login: login,
+            logout: logout,
+            setCurrentUser: setCurrentUser,
+            getCurrentUser: getCurrentUser
+        };
+    };
+
+    angular.module('driveMonitor').service('AuthenticationService', authenticationService);
+
+})();
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\authentication\\authentication.service.js","/features\\authentication")
+},{"buffer":16,"e/U+97":19}],5:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 require('./user/user.service.js');
+require('./authentication/authentication.service.js');
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\index.js","/features")
-},{"./user/user.service.js":5,"buffer":14,"e/U+97":17}],5:[function(require,module,exports){
+},{"./authentication/authentication.service.js":4,"./user/user.service.js":6,"buffer":16,"e/U+97":19}],6:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-var userService = function ($http, $window, $q, Upload) {
-    var _currentUser = null;
+(function () {
+    var userService = function ($http, $window, $q, Upload) {
+        var update = function (userId, user) {
+            return $http.patch('/users/' + userId, user);
+        };
 
-    var saveToken = function (token) {
-        $window.localStorage['mean-token'] = token;
+        var getUsers = function (quantity, isMonitor) {
+            return $http({
+                url: '/users',
+                method: "GET",
+                params: {
+                    quantity: quantity,
+                    isMonitor: isMonitor
+                }
+            }).then(function (result) {
+                return result.data;
+            });
+        };
+
+        var getUser = function (userId) {
+            return $http({
+                url: '/users/' + userId,
+                method: "GET"
+            }).then(function (result) {
+                return result.data;
+            });
+        };
+
+        var updateProfilePicture = function (userId, blob) {
+            return Upload.upload({
+                url: '/users/' + userId,
+                method: 'POST',
+                file: blob
+            });
+        };
+
+        return {
+            update: update,
+            getUsers: getUsers,
+            getUser: getUser,
+            updateProfilePicture: updateProfilePicture
+        };
     };
 
-    var getToken = function () {
-        return $window.localStorage['mean-token'];
-    };
-
-    var setCurrentUser = function (user) {
-        _currentUser = user;
-    };
-
-    var getCurrentUser = function () {
-        return _currentUser;
-    };
-
-    var isLoggedIn = function () {
-        var token = getToken();
-        if (token) {
-            var payload = token.split('.')[1];
-            payload = $window.atob(payload);
-            payload = JSON.parse(payload);
-
-            _currentUser = _currentUser || {
-                _id: payload._id,
-                email: payload.email,
-                name: payload.name
-            };
-
-            return payload.exp > Date.now() / 1000;
-        } else {
-            return false;
-        }
-    };
-
-    var register = function (user) {
-        return $http.post('/users', user).success(function (data) {
-            saveToken(data.token);
-        });
-    };
-
-    var login = function (user) {
-        return $http.post('/token', user).success(function (data) {
-            saveToken(data.token);
-        });
-    };
-
-    var logout = function () {
-        $window.localStorage.removeItem('mean-token');
-    };
-
-    var update = function (userId, user) {
-        return $http.patch('/users/' + userId, user);
-    };
-
-    var getUsers = function (quantity) {
-        return $http({
-            url: '/users',
-            method: "GET",
-            params: {
-                quantity: quantity
-            }
-        }).then(function (result) {
-            return result.data;
-        });
-    };
-
-    var getUser = function (userId) {
-        return $http({
-            url: '/users/' + userId,
-            method: "GET"
-        }).then(function (result) {
-            return result.data;
-        });
-    };
-
-    var updateProfilePicture = function (userId, blob) {
-        return Upload.upload({
-            url: '/users/' + userId,
-            method: 'POST',
-            file: blob
-        });
-    };
-
-    return {
-        saveToken: saveToken,
-        getToken: getToken,
-        isLoggedIn: isLoggedIn,
-        register: register,
-        login: login,
-        logout: logout,
-        update: update,
-        getUsers: getUsers,
-        getUser: getUser,
-        setCurrentUser: setCurrentUser,
-        getCurrentUser: getCurrentUser,
-        updateProfilePicture: updateProfilePicture
-    };
-};
-
-angular.module('driveMonitor').service('UserService', userService);
+    angular.module('driveMonitor').service('UserService', userService);
+})();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\user\\user.service.js","/features\\user")
-},{"buffer":14,"e/U+97":17}],6:[function(require,module,exports){
+},{"buffer":16,"e/U+97":19}],7:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     var myApp = {
         bindings: {
-            isLoggedIn: '<'
+            isLoggedIn: '<',
+            loggedInUser: '<'
         },
         templateUrl: 'template/modules/app/myApp.html',
-        controller: function ($scope, UserService) {
+        controller: function ($scope, AuthenticationService) {
             var self = this;
             $scope.$on('onCheckAuthentication', function (e) {
-                self.isLoggedIn = UserService.isLoggedIn();
-                if (self.isLoggedIn) {
-                    
-                }
+                self.isLoggedIn = AuthenticationService.isLoggedIn();
             });
-            self.isLoggedIn = UserService.isLoggedIn();
+            self.isLoggedIn = AuthenticationService.isLoggedIn();
         }
     };
 
     angular.module('driveMonitor').component('myApp', myApp);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\app\\myApp.js","/modules\\app")
-},{"buffer":14,"e/U+97":17}],7:[function(require,module,exports){
+},{"buffer":16,"e/U+97":19}],8:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function() {
     "use strict";
@@ -278,7 +300,7 @@ angular.module('driveMonitor').service('UserService', userService);
 })();
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\home\\home.js","/modules\\home")
-},{"buffer":14,"e/U+97":17}],8:[function(require,module,exports){
+},{"buffer":16,"e/U+97":19}],9:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 require('./app/myApp.js');
 require('./home/home.js');
@@ -286,16 +308,40 @@ require('./login/login.js');
 require('./register/register.js');
 require('./profile/profile.js');
 require('./monitor/monitor.js');
+require('./lesson/lesson.js');
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\index.js","/modules")
-},{"./app/myApp.js":6,"./home/home.js":7,"./login/login.js":9,"./monitor/monitor.js":10,"./profile/profile.js":11,"./register/register.js":12,"buffer":14,"e/U+97":17}],9:[function(require,module,exports){
+},{"./app/myApp.js":7,"./home/home.js":8,"./lesson/lesson.js":10,"./login/login.js":11,"./monitor/monitor.js":12,"./profile/profile.js":13,"./register/register.js":14,"buffer":16,"e/U+97":19}],10:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+(function () {
+    var lessonPage = {
+        bindings: {
+            user: '<'
+        },
+        templateUrl: 'template/modules/lesson/lesson.html',
+        controller: function (UserService) {
+            var self = this;
+            console.log(self.user);
+            self.onSubmit = function () {
+                self.user.isMonitor = true;
+                UserService.update(self.user._id, _.pick(self.user, ['announcement', 'phone', 'isMonitor'])).then(function () {
+                    
+                });
+            };
+        }
+    };
+
+    angular.module('driveMonitor').component('lessonPage', lessonPage);
+})();
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\lesson\\lesson.js","/modules\\lesson")
+},{"buffer":16,"e/U+97":19}],11:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function() {
     "use strict";
 
     var loginPage = {
         templateUrl: "template/modules/login/login.html",
-        controller: function($scope, $state, $stateParams, UserService) {
+        controller: function($scope, $state, $stateParams, AuthenticationService) {
             var self = this;
 
             self.credentials = {
@@ -304,13 +350,13 @@ require('./monitor/monitor.js');
             };
 
             self.$onInit = function(){
-                if(UserService.isLoggedIn()){
+                if(AuthenticationService.isLoggedIn()){
                     $state.go('app.home');
                 }
             };
 
             self.onSubmit = function() {
-                UserService.login(self.credentials).then(function() {
+                AuthenticationService.login(self.credentials).then(function() {
                     $scope.$emit('onCheckAuthentication');
                     if ($stateParams.return) {
                         $state.go($stateParams.return);
@@ -326,7 +372,7 @@ require('./monitor/monitor.js');
 })();
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\login\\login.js","/modules\\login")
-},{"buffer":14,"e/U+97":17}],10:[function(require,module,exports){
+},{"buffer":16,"e/U+97":19}],12:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     "use strict";
@@ -348,7 +394,7 @@ require('./monitor/monitor.js');
     angular.module('driveMonitor').component('monitorPage', monitorPage);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\monitor\\monitor.js","/modules\\monitor")
-},{"buffer":14,"e/U+97":17}],11:[function(require,module,exports){
+},{"buffer":16,"e/U+97":19}],13:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     "use strict";
@@ -390,14 +436,14 @@ require('./monitor/monitor.js');
     angular.module('driveMonitor').component('profilePage', profilePage);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\profile\\profile.js","/modules\\profile")
-},{"buffer":14,"e/U+97":17,"lodash":16}],12:[function(require,module,exports){
+},{"buffer":16,"e/U+97":19,"lodash":18}],14:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     "use strict";
 
     var registerPage = {
         templateUrl: "template/modules/register/register.html",
-        controller: function ($scope, $state, UserService) {
+        controller: function ($scope, $state, AuthenticationService) {
             var self = this;
 
             self.credentials = {
@@ -407,24 +453,31 @@ require('./monitor/monitor.js');
             };
 
             self.$onInit = function () {
-                if (UserService.isLoggedIn()) {
+                if (AuthenticationService.isLoggedIn()) {
                     $state.go('app.home');
                 }
-            }
+            };
 
-            self.onSubmit = function () {
-                UserService.register(self.credentials).then(function () {
+            self.registerAsStudent = function () {
+                AuthenticationService.register(self.credentials).then(function () {
                     $scope.$emit('onCheckAuthentication');
                     $state.go('app.home');
                 });
-            }
+            };
+
+            self.registerAsMonitor = function () {
+                AuthenticationService.register(self.credentials).then(function () {
+                    $scope.$emit('onCheckAuthentication');
+                    $state.go('app.lesson');
+                });
+            };
         }
     };
 
     angular.module('driveMonitor').component('registerPage', registerPage);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\register\\register.js","/modules\\register")
-},{"buffer":14,"e/U+97":17}],13:[function(require,module,exports){
+},{"buffer":16,"e/U+97":19}],15:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -552,7 +605,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\base64-js\\lib\\b64.js","/..\\..\\node_modules\\base64-js\\lib")
-},{"buffer":14,"e/U+97":17}],14:[function(require,module,exports){
+},{"buffer":16,"e/U+97":19}],16:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!
  * The buffer module from node.js, for the browser.
@@ -1665,7 +1718,7 @@ function assert (test, message) {
 }
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\buffer\\index.js","/..\\..\\node_modules\\buffer")
-},{"base64-js":13,"buffer":14,"e/U+97":17,"ieee754":15}],15:[function(require,module,exports){
+},{"base64-js":15,"buffer":16,"e/U+97":19,"ieee754":17}],17:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
@@ -1753,7 +1806,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 }
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\ieee754\\index.js","/..\\..\\node_modules\\ieee754")
-},{"buffer":14,"e/U+97":17}],16:[function(require,module,exports){
+},{"buffer":16,"e/U+97":19}],18:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /**
  * @license
@@ -18822,7 +18875,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 }.call(this));
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\lodash\\lodash.js","/..\\..\\node_modules\\lodash")
-},{"buffer":14,"e/U+97":17}],17:[function(require,module,exports){
+},{"buffer":16,"e/U+97":19}],19:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 // shim for using process in browser
 
@@ -18889,4 +18942,4 @@ process.chdir = function (dir) {
 };
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\process\\browser.js","/..\\..\\node_modules\\process")
-},{"buffer":14,"e/U+97":17}]},{},[3])
+},{"buffer":16,"e/U+97":19}]},{},[3])

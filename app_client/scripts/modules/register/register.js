@@ -3,7 +3,7 @@
 
     var registerPage = {
         templateUrl: "template/modules/register/register.html",
-        controller: function ($scope, $state, UserService) {
+        controller: function ($scope, $state, AuthenticationService) {
             var self = this;
 
             self.credentials = {
@@ -13,17 +13,24 @@
             };
 
             self.$onInit = function () {
-                if (UserService.isLoggedIn()) {
+                if (AuthenticationService.isLoggedIn()) {
                     $state.go('app.home');
                 }
-            }
+            };
 
-            self.onSubmit = function () {
-                UserService.register(self.credentials).then(function () {
+            self.registerAsStudent = function () {
+                AuthenticationService.register(self.credentials).then(function () {
                     $scope.$emit('onCheckAuthentication');
                     $state.go('app.home');
                 });
-            }
+            };
+
+            self.registerAsMonitor = function () {
+                AuthenticationService.register(self.credentials).then(function () {
+                    $scope.$emit('onCheckAuthentication');
+                    $state.go('app.lesson');
+                });
+            };
         }
     };
 

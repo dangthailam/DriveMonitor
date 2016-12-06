@@ -14,7 +14,7 @@
                             </div>
                             <div class="col-xs-12 col-lg-3">
                                 <div class="form-group">
-                                    <button type="submit" name="button" class="btn btn-block btn-raised btn-primary">Rechercher</button>
+                                    <button type="submit" name="button" class="btn btn-block btn-raised btn-primary">Cherchez votre moniteur</button>
                                 </div>
                             </div>
                         </div>
@@ -30,7 +30,7 @@
             <div class="card-deck-wrapper" id="home-users">
                 <div class="card-deck">
                     <div class="card text-lg-center" ng-repeat="user in $ctrl.users">
-                        <img class="card-img-top" src="{{user.imageUrl}}" alt="Card image cap">
+                        <img class="card-img-top" src="{{ user.imageUrl }}" alt="Card image cap">
                         <div class="card-block ">
                             <h4 class="card-title">
                                 <a ui-sref="app.monitor({userId: user._id})">{{ user.name }}</a>

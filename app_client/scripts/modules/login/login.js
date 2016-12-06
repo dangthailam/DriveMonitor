@@ -3,7 +3,7 @@
 
     var loginPage = {
         templateUrl: "template/modules/login/login.html",
-        controller: function($scope, $state, $stateParams, UserService) {
+        controller: function($scope, $state, $stateParams, AuthenticationService) {
             var self = this;
 
             self.credentials = {
@@ -12,13 +12,13 @@
             };
 
             self.$onInit = function(){
-                if(UserService.isLoggedIn()){
+                if(AuthenticationService.isLoggedIn()){
                     $state.go('app.home');
                 }
             };
 
             self.onSubmit = function() {
-                UserService.login(self.credentials).then(function() {
+                AuthenticationService.login(self.credentials).then(function() {
                     $scope.$emit('onCheckAuthentication');
                     if ($stateParams.return) {
                         $state.go($stateParams.return);
