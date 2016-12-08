@@ -1,9 +1,84 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-require('./sidebar/sidebar.js');
+require('./sidebar/sidebar.component.js');
+require('./schedule/schedule.directive.js');
+require('./schedule/schedule.component.js');
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components\\index.js","/components")
-},{"./sidebar/sidebar.js":2,"buffer":16,"e/U+97":19}],2:[function(require,module,exports){
+},{"./schedule/schedule.component.js":2,"./schedule/schedule.directive.js":3,"./sidebar/sidebar.component.js":4,"buffer":22,"e/U+97":25}],2:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+(function () {
+    var schedule = {
+        bindings: {
+            schedule: '<'
+        },
+        templateUrl: function ($attrs) {
+            if ($attrs.canEdit === 'true')
+                return 'template/components/schedule/schedule-edit.html';
+            return 'template/components/schedule/schedule.html';
+        },
+        controller: ['$filter', 'DateTimeService', function ($filter, DateTimeService) {
+            var self = this;
+
+            self.$onInit = function () {
+                self.weekDays = DateTimeService.getWeekDays(new Date());
+                self.dayHours = DateTimeService.getDayHours();
+            };
+
+        }]
+    };
+
+    angular.module('driveMonitor').component('schedule', schedule);
+})();
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components\\schedule\\schedule.component.js","/components\\schedule")
+},{"buffer":22,"e/U+97":25}],3:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+(function () {
+    var scheduleEdit = function ($timeout) {
+        return {
+            restrict: 'C',
+            link: function (scope, element) {
+                var isMouseDown = false;
+                var passedElement = null;
+                var cellIndex = null;
+
+                $timeout(function () {
+                    $(element).find('td.work-hour').mousedown(function () {
+                            isMouseDown = true;
+                            cellIndex = $(this).index();
+                            $(this).toggleClass("highlighted");
+                            return false; // prevent text selection
+                        })
+                        .mouseover(function (e) {
+                            if ($(this).index() !== cellIndex) {
+                                e.preventDefault();
+                                return;
+                            }
+                            if (isMouseDown) {
+                                if ($(this).hasClass("highlighted") && passedElement) {
+                                    passedElement.removeClass("highlighted");
+                                }
+                                $(this).toggleClass("highlighted");
+                            }
+                            passedElement = $(this);
+                        });
+                });
+
+
+
+                $(document).mouseup(function () {
+                    isMouseDown = false;
+                    passedElement = null;
+                    cellIndex = null;
+                });
+            }
+        };
+    };
+
+    angular.module('driveMonitor').directive('scheduleEdit', scheduleEdit);
+})();
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components\\schedule\\schedule.directive.js","/components\\schedule")
+},{"buffer":22,"e/U+97":25}],4:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     "use strict";
@@ -17,14 +92,6 @@ require('./sidebar/sidebar.js');
         controller: function ($scope, AuthenticationService) {
             var self = this;
 
-            self.avatarSrc = 'http://media.npr.org/assets/news/2009/10/27/facebook1_sq-17f6f5e06d5742d8c53576f7c13d5cf7158202a9.jpg?s=16';
-
-            self.$onChanges = function (changes) {
-                if (self.isLoggedIn && self.loggedInUser.image && self.loggedInUser.image.data) {
-                    self.avatarSrc = 'data:' + self.loggedInUser.image.contentType + ';base64,' + self.loggedInUser.image.data;
-                }
-            };
-
             self.logout = function () {
                 AuthenticationService.logout();
                 $scope.$emit('onCheckAuthentication');
@@ -34,8 +101,8 @@ require('./sidebar/sidebar.js');
 
     angular.module('driveMonitor').component('sideBar', sidebar);
 })();
-}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components\\sidebar\\sidebar.js","/components\\sidebar")
-},{"buffer":16,"e/U+97":19}],3:[function(require,module,exports){
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components\\sidebar\\sidebar.component.js","/components\\sidebar")
+},{"buffer":22,"e/U+97":25}],5:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var app = angular.module('driveMonitor', ['ui.router', 'ngFileUpload', 'ngImgCrop']);
 
@@ -51,9 +118,9 @@ angular.module('driveMonitor')
                 $scope.user = loggedInUser;
             },
             resolve: {
-                loggedInUser: function (AuthenticationService, UserService) {
+                loggedInUser: function (AuthenticationService, UserAPIService) {
                     if (AuthenticationService.isLoggedIn()) {
-                        return UserService.getUser(AuthenticationService.getCurrentUser()._id).then(function (user) {
+                        return UserAPIService.getUser(AuthenticationService.getCurrentUser().id).then(function (user) {
                             AuthenticationService.setCurrentUser(user);
                             return user;
                         });
@@ -68,13 +135,8 @@ angular.module('driveMonitor')
                 $scope.users = users;
             },
             resolve: {
-                users: function (UserService) {
-                    return UserService.getUsers(3, true).then(function (users) {
-                        _.forEach(users, function (user) {
-                            user.imageUrl = (user.image && user.image.data) ? 'data:' + user.image.contentType + ';base64,' + user.image.data : 'http://media.npr.org/assets/news/2009/10/27/facebook1_sq-17f6f5e06d5742d8c53576f7c13d5cf7158202a9.jpg?s=16';
-                        });
-                        return users;
-                    });
+                users: function (UserAPIService) {
+                    return UserAPIService.getUsers(3, true);
                 }
             }
         }).state('app.login', {
@@ -90,23 +152,23 @@ angular.module('driveMonitor')
                 $scope.user = user;
             },
             resolve: {
-                user: function ($stateParams, UserService) {
-                    return UserService.getUser($stateParams.userId);
+                user: function ($stateParams, UserAPIService) {
+                    return UserAPIService.getUser($stateParams.userId);
                 }
             }
         }).state('app.profile', {
             url: "/profile",
             template: "<profile-page user='user'></profile-page>",
             forConnectedUser: true,
-            controller: function ($scope, loggedInUser) {
-                $scope.user = loggedInUser;
+            controller: function ($scope, loggedInUser, AuthenticationService) {
+                $scope.user = loggedInUser || AuthenticationService.getCurrentUser();
             }
         }).state('app.lesson', {
             url: "/annonce",
             template: '<lesson-page user="user"></lesson-page>',
             forConnectedUser: true,
-            controller: function ($scope, loggedInUser) {
-                $scope.user = loggedInUser;
+            controller: function ($scope, loggedInUser, AuthenticationService) {
+                $scope.user = loggedInUser || AuthenticationService.getCurrentUser();
             }
         });
     }).run(function ($rootScope, $state, AuthenticationService) {
@@ -115,15 +177,12 @@ angular.module('driveMonitor')
             if (toState.forConnectedUser && !isLoggedIn) {
                 e.preventDefault();
                 $state.transitionTo('app.login', {
-                    return: 'app.profile'
+                    return: toState.name ? toState.name : 'app.profile'
                 });
             }
-
-            if (toState.name == "app.lesson" && !isLoggedIn) {
-                e.preventDefault();
-                $state.transitionTo('app.register');
-            }
         });
+    }).factory('_', function(){
+        return window._;
     });
 
 
@@ -132,11 +191,11 @@ require('./modules/index.js');
 require('./features/index.js');
 
 angular.bootstrap(document, ['driveMonitor']);
-}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_d1dc63e1.js","/")
-},{"./components/index.js":1,"./features/index.js":5,"./modules/index.js":9,"buffer":16,"e/U+97":19}],4:[function(require,module,exports){
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_1b577b77.js","/")
+},{"./components/index.js":1,"./features/index.js":9,"./modules/index.js":15,"buffer":22,"e/U+97":25}],6:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
-    var authenticationService = function ($http, $window) {
+    var authenticationService = function ($http, $window, UserAPIService, User) {
         var _currentUser = null;
 
         var saveToken = function (token) {
@@ -157,32 +216,29 @@ angular.bootstrap(document, ['driveMonitor']);
 
         var isLoggedIn = function () {
             var token = getToken();
-            if (token) {
-                var payload = token.split('.')[1];
-                payload = $window.atob(payload);
-                payload = JSON.parse(payload);
-
-                _currentUser = _currentUser || {
-                    _id: payload._id,
-                    email: payload.email,
-                    name: payload.name
-                };
-
-                return payload.exp > Date.now() / 1000;
-            } else {
-                return false;
-            }
+            if (!token) return false;
+            var payload = parseTokenAndSetCurrentUser(token);
+            return payload.exp > Date.now() / 1000;
         };
 
+        function parseTokenAndSetCurrentUser(token) {
+            var payload = token.split('.')[1];
+            payload = $window.atob(payload);
+            payload = JSON.parse(payload);
+            _currentUser = _currentUser || new User(payload._id, payload.email, payload.name);
+            return payload;
+        }
+
         var register = function (user) {
-            return $http.post('/users', user).success(function (data) {
-                saveToken(data.token);
+            return UserAPIService.register(user).then(function (response) {
+                saveToken(response.data.token);
             });
         };
 
         var login = function (user) {
-            return $http.post('/token', user).success(function (data) {
-                saveToken(data.token);
+            return UserAPIService.login(user).then(function (response) {
+                saveToken(response.data.token);
+                parseTokenAndSetCurrentUser(response.data.token);
             });
         };
 
@@ -194,7 +250,7 @@ angular.bootstrap(document, ['driveMonitor']);
             saveToken: saveToken,
             getToken: getToken,
             isLoggedIn: isLoggedIn,
-            register: register,
+            regiser: register,
             login: login,
             logout: logout,
             setCurrentUser: setCurrentUser,
@@ -206,16 +262,102 @@ angular.bootstrap(document, ['driveMonitor']);
 
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\authentication\\authentication.service.js","/features\\authentication")
-},{"buffer":16,"e/U+97":19}],5:[function(require,module,exports){
+},{"buffer":22,"e/U+97":25}],7:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+(function () {
+    var displayHour = function () {
+        return function (hour) {
+            return `${hour.hour > 9 ? hour.hour : '0' + hour.hour}:${hour.minute === 0 ? '00' : '30'}`;
+        };
+    };
+
+    angular.module('driveMonitor').filter('displayHour', displayHour);
+})();
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\datetime\\datetime.filter.js","/features\\datetime")
+},{"buffer":22,"e/U+97":25}],8:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+(function () {
+    var dateTimeService = function () {
+        var ticsPerDay = 60 * 60 * 24 * 1000;
+
+        var getDayHours = function () {
+            var hours = [];
+            for (var i = 0; i < 24; i++) {
+                hours.splice(2 * i, 0, {
+                    hour: i,
+                    minute: 0
+                }, {
+                    hour: i,
+                    minute: 30
+                });
+            }
+            return hours;
+        };
+
+        var getWeekDays = function (date) {
+            var daysOfWeek = [];
+            for (var i = 0; i < 7; i++) {
+                var today = date.setTime(date.getTime() + i * ticsPerDay);
+                daysOfWeek.push(today);
+            }
+            return daysOfWeek;
+        };
+
+        return {
+            getWeekDays: getWeekDays,
+            getDayHours: getDayHours
+        };
+    };
+
+    angular.module('driveMonitor').service('DateTimeService', dateTimeService);
+})();
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\datetime\\datetime.service.js","/features\\datetime")
+},{"buffer":22,"e/U+97":25}],9:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+require('./datetime/datetime.filter.js');
+require('./datetime/datetime.service.js');
+require('./user/user.model.js');
 require('./user/user.service.js');
+require('./user/userAPI.service.js');
 require('./authentication/authentication.service.js');
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\index.js","/features")
-},{"./authentication/authentication.service.js":4,"./user/user.service.js":6,"buffer":16,"e/U+97":19}],6:[function(require,module,exports){
+},{"./authentication/authentication.service.js":6,"./datetime/datetime.filter.js":7,"./datetime/datetime.service.js":8,"./user/user.model.js":10,"./user/user.service.js":11,"./user/userAPI.service.js":12,"buffer":22,"e/U+97":25}],10:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
-    var userService = function ($http, $window, $q, Upload) {
+
+    angular.module('driveMonitor').factory('User', function () {
+        var defaultPhotoUrl = 'http://media.npr.org/assets/news/2009/10/27/facebook1_sq-17f6f5e06d5742d8c53576f7c13d5cf7158202a9.jpg?s=16';
+
+        class User {
+            constructor(id, email, name, location, phone, birth, image, isMonitor, announcement) {
+                this.id = id;
+                this.email = email;
+                this.name = name;
+                this.location = location;
+                this.phone = phone;
+                this.birth = birth;
+                this.imageUrl = (image && image.data) ? 'data:' + image.contentType + ';base64,' + image.data : defaultPhotoUrl;
+                this.isMonitor = isMonitor;
+                this.announcement = announcement;
+            }
+        }
+
+        return User;
+    });
+
+})();
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\user\\user.model.js","/features\\user")
+},{"buffer":22,"e/U+97":25}],11:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+(function(){
+
+})();
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\user\\user.service.js","/features\\user")
+},{"buffer":22,"e/U+97":25}],12:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+(function () {
+    var userAPIService = function ($http, $window, $q, _, Upload, User) {
         var update = function (userId, user) {
             return $http.patch('/users/' + userId, user);
         };
@@ -229,7 +371,9 @@ require('./authentication/authentication.service.js');
                     isMonitor: isMonitor
                 }
             }).then(function (result) {
-                return result.data;
+                return _.map(result.data, function(u){
+                    return new User(u._id, u.email, u.name, u.location, u.phone, u.birth, u.image, u.isMonitor, u.announcement);
+                });
             });
         };
 
@@ -238,7 +382,8 @@ require('./authentication/authentication.service.js');
                 url: '/users/' + userId,
                 method: "GET"
             }).then(function (result) {
-                return result.data;
+                var u = result.data;
+                return new User(u._id, u.email, u.name, u.location, u.phone, u.birth, u.image, u.isMonitor, u.announcement);
             });
         };
 
@@ -250,18 +395,28 @@ require('./authentication/authentication.service.js');
             });
         };
 
+        var register = function (user) {
+            return $http.post('/users', user);
+        };
+
+        var login = function (user) {
+            return $http.post('/token', user);
+        };
+
         return {
             update: update,
             getUsers: getUsers,
             getUser: getUser,
-            updateProfilePicture: updateProfilePicture
+            updateProfilePicture: updateProfilePicture,
+            register: register,
+            login: login
         };
     };
 
-    angular.module('driveMonitor').service('UserService', userService);
+    angular.module('driveMonitor').service('UserAPIService', userAPIService);
 })();
-}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\user\\user.service.js","/features\\user")
-},{"buffer":16,"e/U+97":19}],7:[function(require,module,exports){
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\user\\userAPI.service.js","/features\\user")
+},{"buffer":22,"e/U+97":25}],13:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     var myApp = {
@@ -274,6 +429,7 @@ require('./authentication/authentication.service.js');
             var self = this;
             $scope.$on('onCheckAuthentication', function (e) {
                 self.isLoggedIn = AuthenticationService.isLoggedIn();
+                self.loggedInUser = AuthenticationService.getCurrentUser();
             });
             self.isLoggedIn = AuthenticationService.isLoggedIn();
         }
@@ -282,7 +438,7 @@ require('./authentication/authentication.service.js');
     angular.module('driveMonitor').component('myApp', myApp);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\app\\myApp.js","/modules\\app")
-},{"buffer":16,"e/U+97":19}],8:[function(require,module,exports){
+},{"buffer":22,"e/U+97":25}],14:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function() {
     "use strict";
@@ -292,7 +448,7 @@ require('./authentication/authentication.service.js');
             users: '<'
         },
         templateUrl: "template/modules/home/home.html",
-        controller: function($scope){
+        controller: function($scope, User){
             var self = this;
         }
     };
@@ -300,7 +456,7 @@ require('./authentication/authentication.service.js');
 })();
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\home\\home.js","/modules\\home")
-},{"buffer":16,"e/U+97":19}],9:[function(require,module,exports){
+},{"buffer":22,"e/U+97":25}],15:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 require('./app/myApp.js');
 require('./home/home.js');
@@ -311,7 +467,7 @@ require('./monitor/monitor.js');
 require('./lesson/lesson.js');
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\index.js","/modules")
-},{"./app/myApp.js":7,"./home/home.js":8,"./lesson/lesson.js":10,"./login/login.js":11,"./monitor/monitor.js":12,"./profile/profile.js":13,"./register/register.js":14,"buffer":16,"e/U+97":19}],10:[function(require,module,exports){
+},{"./app/myApp.js":13,"./home/home.js":14,"./lesson/lesson.js":16,"./login/login.js":17,"./monitor/monitor.js":18,"./profile/profile.js":19,"./register/register.js":20,"buffer":22,"e/U+97":25}],16:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     var lessonPage = {
@@ -319,14 +475,12 @@ require('./lesson/lesson.js');
             user: '<'
         },
         templateUrl: 'template/modules/lesson/lesson.html',
-        controller: function (UserService) {
+        controller: function (UserAPIService) {
             var self = this;
-            console.log(self.user);
+            
             self.onSubmit = function () {
                 self.user.isMonitor = true;
-                UserService.update(self.user._id, _.pick(self.user, ['announcement', 'phone', 'isMonitor'])).then(function () {
-                    
-                });
+                UserAPIService.update(self.user.id, _.pick(self.user, ['announcement', 'phone', 'isMonitor']));
             };
         }
     };
@@ -334,14 +488,14 @@ require('./lesson/lesson.js');
     angular.module('driveMonitor').component('lessonPage', lessonPage);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\lesson\\lesson.js","/modules\\lesson")
-},{"buffer":16,"e/U+97":19}],11:[function(require,module,exports){
+},{"buffer":22,"e/U+97":25}],17:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-(function() {
+(function () {
     "use strict";
 
     var loginPage = {
         templateUrl: "template/modules/login/login.html",
-        controller: function($scope, $state, $stateParams, AuthenticationService) {
+        controller: function ($scope, $state, $stateParams, UserAPIService, AuthenticationService) {
             var self = this;
 
             self.credentials = {
@@ -349,30 +503,32 @@ require('./lesson/lesson.js');
                 password: null
             };
 
-            self.$onInit = function(){
-                if(AuthenticationService.isLoggedIn()){
+            self.$onInit = function () {
+                if (AuthenticationService.isLoggedIn()) {
                     $state.go('app.home');
                 }
             };
 
-            self.onSubmit = function() {
-                AuthenticationService.login(self.credentials).then(function() {
-                    $scope.$emit('onCheckAuthentication');
-                    if ($stateParams.return) {
-                        $state.go($stateParams.return);
-                    } else {
-                        $state.go('app.home');
-                    }
+            self.onSubmit = function () {
+                AuthenticationService.login(self.credentials).then(function () {
+                    UserAPIService.getUser(AuthenticationService.getCurrentUser().id).then(function (user) {
+                        AuthenticationService.setCurrentUser(user);
+                        $scope.$emit('onCheckAuthentication');
+                        if ($stateParams.return) {
+                            $state.go($stateParams.return);
+                        } else {
+                            $state.go('app.home');
+                        }
+                    });
                 });
-            }
+            };
         }
     };
 
     angular.module('driveMonitor').component('loginPage', loginPage);
 })();
-
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\login\\login.js","/modules\\login")
-},{"buffer":16,"e/U+97":19}],12:[function(require,module,exports){
+},{"buffer":22,"e/U+97":25}],18:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     "use strict";
@@ -382,7 +538,7 @@ require('./lesson/lesson.js');
             user: '<'
         },
         templateUrl: "template/modules/monitor/monitor.html",
-        controller: function ($location, UserService) {
+        controller: function ($location, UserAPIService) {
             var self = this;
 
             self.avatarUrl = self.user.image && self.user.image.data ?
@@ -394,7 +550,7 @@ require('./lesson/lesson.js');
     angular.module('driveMonitor').component('monitorPage', monitorPage);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\monitor\\monitor.js","/modules\\monitor")
-},{"buffer":16,"e/U+97":19}],13:[function(require,module,exports){
+},{"buffer":22,"e/U+97":25}],19:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     "use strict";
@@ -405,7 +561,7 @@ require('./lesson/lesson.js');
             user: '<'
         },
         templateUrl: "template/modules/profile/profile.html",
-        controller: function ($scope, $window, $timeout, Upload, UserService) {
+        controller: function ($scope, $window, $timeout, Upload, UserAPIService) {
             var self = this;
             
             self.avatarUrl = self.user.image && self.user.image.data ?
@@ -413,13 +569,13 @@ require('./lesson/lesson.js');
                 'http://media.npr.org/assets/news/2009/10/27/facebook1_sq-17f6f5e06d5742d8c53576f7c13d5cf7158202a9.jpg?s=16';
 
             self.onSubmit = function () {
-                UserService.update(self.user._id, _.omit(self.user, ['_id', 'email', 'roles', 'image'])).then(function () {
+                UserAPIService.update(self.user.id, _.omit(self.user, ['id', 'email', 'roles', 'image'])).then(function () {
                     done();
                 });
             };
 
             self.upload = function (dataUrl, name) {
-                UserService.updateProfilePicture(self.user._id, Upload.dataUrltoBlob(dataUrl, name)).then(function (response) {
+                UserAPIService.updateProfilePicture(self.user.id, Upload.dataUrltoBlob(dataUrl, name)).then(function (response) {
                     done();
                 });
             };
@@ -436,7 +592,7 @@ require('./lesson/lesson.js');
     angular.module('driveMonitor').component('profilePage', profilePage);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\profile\\profile.js","/modules\\profile")
-},{"buffer":16,"e/U+97":19,"lodash":18}],14:[function(require,module,exports){
+},{"buffer":22,"e/U+97":25,"lodash":24}],20:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     "use strict";
@@ -477,7 +633,7 @@ require('./lesson/lesson.js');
     angular.module('driveMonitor').component('registerPage', registerPage);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\register\\register.js","/modules\\register")
-},{"buffer":16,"e/U+97":19}],15:[function(require,module,exports){
+},{"buffer":22,"e/U+97":25}],21:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -605,7 +761,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\base64-js\\lib\\b64.js","/..\\..\\node_modules\\base64-js\\lib")
-},{"buffer":16,"e/U+97":19}],16:[function(require,module,exports){
+},{"buffer":22,"e/U+97":25}],22:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!
  * The buffer module from node.js, for the browser.
@@ -1718,7 +1874,7 @@ function assert (test, message) {
 }
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\buffer\\index.js","/..\\..\\node_modules\\buffer")
-},{"base64-js":15,"buffer":16,"e/U+97":19,"ieee754":17}],17:[function(require,module,exports){
+},{"base64-js":21,"buffer":22,"e/U+97":25,"ieee754":23}],23:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
@@ -1806,7 +1962,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 }
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\ieee754\\index.js","/..\\..\\node_modules\\ieee754")
-},{"buffer":16,"e/U+97":19}],18:[function(require,module,exports){
+},{"buffer":22,"e/U+97":25}],24:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /**
  * @license
@@ -18875,7 +19031,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 }.call(this));
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\lodash\\lodash.js","/..\\..\\node_modules\\lodash")
-},{"buffer":16,"e/U+97":19}],19:[function(require,module,exports){
+},{"buffer":22,"e/U+97":25}],25:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 // shim for using process in browser
 
@@ -18942,4 +19098,4 @@ process.chdir = function (dir) {
 };
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\process\\browser.js","/..\\..\\node_modules\\process")
-},{"buffer":16,"e/U+97":19}]},{},[3])
+},{"buffer":22,"e/U+97":25}]},{},[5])

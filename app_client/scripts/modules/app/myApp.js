@@ -9,6 +9,7 @@
             var self = this;
             $scope.$on('onCheckAuthentication', function (e) {
                 self.isLoggedIn = AuthenticationService.isLoggedIn();
+                self.loggedInUser = AuthenticationService.getCurrentUser();
             });
             self.isLoggedIn = AuthenticationService.isLoggedIn();
         }

@@ -5370,6 +5370,9 @@ img-crop canvas {
   border: 1px solid #ccc;
   background-color: white; }
 
+#lesson ul.nav-tabs {
+  margin-bottom: 1rem; }
+
 #monitor-profile-page {
   padding: 20px;
   margin-top: -120px; }
@@ -5405,6 +5408,17 @@ nav img.user-avatar {
   width: 40px;
   height: 40px; }
 
+.schedule-edit thead tr td {
+  text-align: center; }
+
+.schedule-edit td {
+  cursor: n-resize;
+  padding: 0 10px;
+  height: 20px;
+  line-height: 20px; }
+  .schedule-edit td.highlighted {
+    background-color: #98fb98; }
+
 #form-container-background {
   padding: 100px 40px 80px 40px;
   position: relative;
@@ -5422,9 +5436,12 @@ nav img.user-avatar {
     border: 1px solid #ccc; }
 
 body {
-  background-color: #f0f0f0; }
+  background-color: #f0f0f0;
+  min-width: 768px; }
   body nav {
     background-color: #fff; }
+  body a {
+    cursor: pointer; }
 
 img.logo {
   width: 50px;

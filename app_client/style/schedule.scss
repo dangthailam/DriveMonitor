@@ -1,0 +1,16 @@
+.schedule-edit {
+    thead tr td{
+        text-align: center;
+    }
+    
+    td{
+        cursor: n-resize;
+        padding: 0 10px;
+        height: 20px;
+        line-height: 20px;
+
+        &.highlighted{
+            background-color: #98fb98;
+        }
+    }
+}

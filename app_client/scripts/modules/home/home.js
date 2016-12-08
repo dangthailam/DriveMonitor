@@ -6,7 +6,7 @@
             users: '<'
         },
         templateUrl: "template/modules/home/home.html",
-        controller: function($scope){
+        controller: function($scope, User){
             var self = this;
         }
     };

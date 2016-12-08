@@ -7,7 +7,7 @@
             user: '<'
         },
         templateUrl: "template/modules/profile/profile.html",
-        controller: function ($scope, $window, $timeout, Upload, UserService) {
+        controller: function ($scope, $window, $timeout, Upload, UserAPIService) {
             var self = this;
             
             self.avatarUrl = self.user.image && self.user.image.data ?
@@ -15,13 +15,13 @@
                 'http://media.npr.org/assets/news/2009/10/27/facebook1_sq-17f6f5e06d5742d8c53576f7c13d5cf7158202a9.jpg?s=16';
 
             self.onSubmit = function () {
-                UserService.update(self.user._id, _.omit(self.user, ['_id', 'email', 'roles', 'image'])).then(function () {
+                UserAPIService.update(self.user.id, _.omit(self.user, ['id', 'email', 'roles', 'image'])).then(function () {
                     done();
                 });
             };
 
             self.upload = function (dataUrl, name) {
-                UserService.updateProfilePicture(self.user._id, Upload.dataUrltoBlob(dataUrl, name)).then(function (response) {
+                UserAPIService.updateProfilePicture(self.user.id, Upload.dataUrltoBlob(dataUrl, name)).then(function (response) {
                     done();
                 });
             };

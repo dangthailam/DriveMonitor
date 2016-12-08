@@ -1,7 +1,11 @@
 body {
     background-color: #f0f0f0;
+    min-width: 768px;
     nav {
         background-color: #fff;
+    }
+    a {
+        cursor: pointer;
     }
 }
 

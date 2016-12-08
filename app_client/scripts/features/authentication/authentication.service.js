@@ -1,5 +1,5 @@
 (function () {
-    var authenticationService = function ($http, $window) {
+    var authenticationService = function ($http, $window, UserAPIService, User) {
         var _currentUser = null;
 
         var saveToken = function (token) {
@@ -20,32 +20,29 @@
 
         var isLoggedIn = function () {
             var token = getToken();
-            if (token) {
-                var payload = token.split('.')[1];
-                payload = $window.atob(payload);
-                payload = JSON.parse(payload);
-
-                _currentUser = _currentUser || {
-                    _id: payload._id,
-                    email: payload.email,
-                    name: payload.name
-                };
-
-                return payload.exp > Date.now() / 1000;
-            } else {
-                return false;
-            }
+            if (!token) return false;
+            var payload = parseTokenAndSetCurrentUser(token);
+            return payload.exp > Date.now() / 1000;
         };
 
+        function parseTokenAndSetCurrentUser(token) {
+            var payload = token.split('.')[1];
+            payload = $window.atob(payload);
+            payload = JSON.parse(payload);
+            _currentUser = _currentUser || new User(payload._id, payload.email, payload.name);
+            return payload;
+        }
+
         var register = function (user) {
-            return $http.post('/users', user).success(function (data) {
-                saveToken(data.token);
+            return UserAPIService.register(user).then(function (response) {
+                saveToken(response.data.token);
             });
         };
 
         var login = function (user) {
-            return $http.post('/token', user).success(function (data) {
-                saveToken(data.token);
+            return UserAPIService.login(user).then(function (response) {
+                saveToken(response.data.token);
+                parseTokenAndSetCurrentUser(response.data.token);
             });
         };
 
@@ -57,7 +54,7 @@
             saveToken: saveToken,
             getToken: getToken,
             isLoggedIn: isLoggedIn,
-            register: register,
+            regiser: register,
             login: login,
             logout: logout,
             setCurrentUser: setCurrentUser,

@@ -6,7 +6,7 @@
             user: '<'
         },
         templateUrl: "template/modules/monitor/monitor.html",
-        controller: function ($location, UserService) {
+        controller: function ($location, UserAPIService) {
             var self = this;
 
             self.avatarUrl = self.user.image && self.user.image.data ?

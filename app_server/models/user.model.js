@@ -1,87 +1,95 @@
-var mongoose = require('mongoose');
-var crypto = require('crypto');
-var jwt = require('jsonwebtoken');
-var _ = require('lodash');
+require('./schedule.model');
 
-var userSchema = new mongoose.Schema({
-    email: {
-        type: String,
-        unique: true,
-        required: true
-    },
-    name: {
-        type: String,
-        required: true
-    },
-    location: {
-        address: String,
-        city: String,
-        postal: String
-    },
-    phone: String,
-    birth: {
-        day: Number,
-        month: Number,
-        year: Number
-    },
-    created_at: Date,
-    updated_at: Date,
-    image: {
-        data: Buffer,
-        contentType: String,
-        fileName: String
-    },
-    isMonitor: Boolean,
-    announcement: {
-        title: String,
-        description: String,
-        rate: String,
-        address: String,
-        city: String,
-        postal: String
-    },
-    hash: String,
-    salt: String
-});
+(function () {
+    var mongoose = require('mongoose');
+    var crypto = require('crypto');
+    var jwt = require('jsonwebtoken');
+    var _ = require('lodash');
 
-userSchema.methods.setPassword = function(password) {
-    this.salt = crypto.randomBytes(16).toString('hex');
-    this.hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64).toString('hex');
-};
+    var userSchema = new mongoose.Schema({
+        email: {
+            type: String,
+            unique: true,
+            required: true
+        },
+        name: {
+            type: String,
+            required: true
+        },
+        location: {
+            address: String,
+            city: String,
+            postal: String
+        },
+        phone: String,
+        birth: {
+            day: Number,
+            month: Number,
+            year: Number
+        },
+        created_at: Date,
+        updated_at: Date,
+        image: {
+            data: Buffer,
+            contentType: String,
+            fileName: String
+        },
+        isMonitor: Boolean,
+        announcement: {
+            title: String,
+            description: String,
+            rate: String,
+            address: String,
+            city: String,
+            postal: String
+        },
+        scheduleRange: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Schedule'
+        }],
+        hash: String,
+        salt: String
+    });
 
-userSchema.methods.validPassword = function(password) {
-    var hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64).toString('hex');
-    return this.hash === hash;
-};
+    userSchema.methods.setPassword = function (password) {
+        this.salt = crypto.randomBytes(16).toString('hex');
+        this.hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64).toString('hex');
+    };
 
-userSchema.methods.generateJwt = function() {
-    var expiry = new Date();
-    expiry.setDate(expiry.getDate() + 7);
+    userSchema.methods.validPassword = function (password) {
+        var hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64).toString('hex');
+        return this.hash === hash;
+    };
 
-    return jwt.sign({
-        _id: this._id,
-        email: this.email,
-        name: this.name,
-        exp: parseInt(expiry.getTime() / 1000),
-    }, "MY_SECRET"); // DO NOT KEEP YOUR SECRET IN THE CODE!
-};
+    userSchema.methods.generateJwt = function () {
+        var expiry = new Date();
+        expiry.setDate(expiry.getDate() + 7);
 
-userSchema.methods.export = function() {
-    return _.omit(this.toObject(), ['__v', 'created_at', 'updated_at', 'hash', 'salt']);
-};
+        return jwt.sign({
+            _id: this._id,
+            email: this.email,
+            name: this.name,
+            exp: parseInt(expiry.getTime() / 1000),
+        }, "MY_SECRET"); // DO NOT KEEP YOUR SECRET IN THE CODE!
+    };
 
-userSchema.pre('save', function(next){
-    // get the current date
-  var currentDate = new Date();
+    userSchema.methods.export = function () {
+        return _.omit(this.toObject(), ['__v', 'created_at', 'updated_at', 'hash', 'salt']);
+    };
 
-  // change the updated_at field to current date
-  this.updated_at = currentDate;
+    userSchema.pre('save', function (next) {
+        // get the current date
+        var currentDate = new Date();
 
-  // if created_at doesn't exist, add to that field
-  if (!this.created_at)
-    this.created_at = currentDate;
+        // change the updated_at field to current date
+        this.updated_at = currentDate;
 
-  next();
-});
+        // if created_at doesn't exist, add to that field
+        if (!this.created_at)
+            this.created_at = currentDate;
 
-mongoose.model('User', userSchema);
+        next();
+    });
+
+    mongoose.model('User', userSchema);
+})();

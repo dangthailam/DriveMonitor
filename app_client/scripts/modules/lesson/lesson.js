@@ -4,14 +4,12 @@
             user: '<'
         },
         templateUrl: 'template/modules/lesson/lesson.html',
-        controller: function (UserService) {
+        controller: function (UserAPIService) {
             var self = this;
-            console.log(self.user);
+            
             self.onSubmit = function () {
                 self.user.isMonitor = true;
-                UserService.update(self.user._id, _.pick(self.user, ['announcement', 'phone', 'isMonitor'])).then(function () {
-                    
-                });
+                UserAPIService.update(self.user.id, _.pick(self.user, ['announcement', 'phone', 'isMonitor']));
             };
         }
     };
