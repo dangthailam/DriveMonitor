@@ -54,7 +54,7 @@
             saveToken: saveToken,
             getToken: getToken,
             isLoggedIn: isLoggedIn,
-            regiser: register,
+            register: register,
             login: login,
             logout: logout,
             setCurrentUser: setCurrentUser,
