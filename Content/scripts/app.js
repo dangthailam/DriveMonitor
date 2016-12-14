@@ -1,30 +1,97 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 require('./sidebar/sidebar.component.js');
-require('./schedule/schedule.directive.js');
 require('./schedule/schedule.component.js');
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components\\index.js","/components")
-},{"./schedule/schedule.component.js":2,"./schedule/schedule.directive.js":3,"./sidebar/sidebar.component.js":4,"buffer":22,"e/U+97":25}],2:[function(require,module,exports){
+},{"./schedule/schedule.component.js":2,"./sidebar/sidebar.component.js":3,"buffer":22,"e/U+97":25}],2:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     var schedule = {
         bindings: {
             schedule: '<'
         },
-        templateUrl: function ($attrs) {
-            if ($attrs.canEdit === 'true')
-                return 'template/components/schedule/schedule-edit.html';
-            return 'template/components/schedule/schedule.html';
-        },
-        controller: ['$filter', 'DateTimeService', function ($filter, DateTimeService) {
+        templateUrl: 'template/components/schedule/schedule-edit.html',
+        controller: ['$scope', '$filter', '$window', 'DateTimeService', '_', function ($scope, $filter, $window, DateTimeService, _) {
             var self = this;
-
+            var isMouseDown = false;
+            var parentTopPosition = null;
+            var selectingHour = null;
+            var day = null;
+            var draggingHourIndex = null;
+            var beginHourIndex = null;
+            console.log(self.schedule);
             self.$onInit = function () {
                 self.weekDays = DateTimeService.getWeekDays(new Date());
                 self.dayHours = DateTimeService.getDayHours();
             };
 
+            self.removeThisHour = function (range, day) {
+                var idx = _.findIndex(self.schedule[day].ranges, function (r) {
+                    return r.day === range.day;
+                });
+                if (idx != -1) {
+                    self.schedule[day].ranges.splice(idx, 1);
+                }
+            };
+
+            self.beginDragging = function (event, weekDay) {
+                day = weekDay;
+                parentTopPosition = $(event.target).offset().top;
+                beginHourIndex = Math.floor((event.pageY - parentTopPosition) / 21);
+                selectingHour = {
+                    startIndex: beginHourIndex,
+                    endIndex: beginHourIndex + 1
+                };
+                self.schedule[weekDay.value].ranges.push(selectingHour);
+                isMouseDown = true;
+            };
+
+            self.onDragging = function (event, weekDay) {
+                if (isMouseDown) {
+                    draggingHourIndex = Math.round((event.pageY - parentTopPosition) / 21);
+                    if (draggingHourIndex > beginHourIndex) {
+                        selectingHour.endIndex = draggingHourIndex;
+                    }
+                }
+            };
+
+            $window.addEventListener('mouseup', function (e) {
+                if (isMouseDown) {
+
+                    /** Get hour range indexes which are included inside new hour range */
+                    var indexes = [];
+                    for (var i = 0; i < self.schedule[day.value].ranges.length; i++) {
+                        var range = self.schedule[day.value].ranges[i];
+                        if (range.startIndex != selectingHour.startIndex && range.startIndex <= draggingHourIndex) {
+                            indexes.push(i);
+                        }
+                    }
+
+                    if (indexes.length) {
+
+                        /** With the last hour range index, compare its endIndex to determine whether we should include it into new range */
+                        var lastHourRangeIndex = indexes[indexes.length - 1];
+                        if (draggingHourIndex >= self.schedule[day.value].ranges[lastHourRangeIndex].endIndex) {
+                            self.schedule[day.value].ranges.splice(lastHourRangeIndex, 1);
+                        } else if (draggingHourIndex < self.schedule[day.value].ranges[lastHourRangeIndex].endIndex && draggingHourIndex >= self.schedule[day.value].ranges[lastHourRangeIndex].startIndex) {
+                            selectingHour.endIndex = self.schedule[day.value].ranges[lastHourRangeIndex].endIndex;
+                            self.schedule[day.value].ranges.splice(lastHourRangeIndex, 1);
+                        }
+
+                        /** If there are more than 1 hour range to be included, delete all except the last one */
+                        if (indexes.length > 1) {
+                            for (var j = indexes.length - 2; j >= 0; j--) {
+                                self.schedule[day.value].ranges.splice(indexes[j], 1);
+                            }
+                        }
+                    }
+                }
+                isMouseDown = false;
+                parentTopPosition = null;
+                selectingHour = null;
+                day = null;
+            });
         }]
     };
 
@@ -32,53 +99,6 @@ require('./schedule/schedule.component.js');
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components\\schedule\\schedule.component.js","/components\\schedule")
 },{"buffer":22,"e/U+97":25}],3:[function(require,module,exports){
-(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-(function () {
-    var scheduleEdit = function ($timeout) {
-        return {
-            restrict: 'C',
-            link: function (scope, element) {
-                var isMouseDown = false;
-                var passedElement = null;
-                var cellIndex = null;
-
-                $timeout(function () {
-                    $(element).find('td.work-hour').mousedown(function () {
-                            isMouseDown = true;
-                            cellIndex = $(this).index();
-                            $(this).toggleClass("highlighted");
-                            return false; // prevent text selection
-                        })
-                        .mouseover(function (e) {
-                            if ($(this).index() !== cellIndex) {
-                                e.preventDefault();
-                                return;
-                            }
-                            if (isMouseDown) {
-                                if ($(this).hasClass("highlighted") && passedElement) {
-                                    passedElement.removeClass("highlighted");
-                                }
-                                $(this).toggleClass("highlighted");
-                            }
-                            passedElement = $(this);
-                        });
-                });
-
-
-
-                $(document).mouseup(function () {
-                    isMouseDown = false;
-                    passedElement = null;
-                    cellIndex = null;
-                });
-            }
-        };
-    };
-
-    angular.module('driveMonitor').directive('scheduleEdit', scheduleEdit);
-})();
-}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components\\schedule\\schedule.directive.js","/components\\schedule")
-},{"buffer":22,"e/U+97":25}],4:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     "use strict";
@@ -102,7 +122,7 @@ require('./schedule/schedule.component.js');
     angular.module('driveMonitor').component('sideBar', sidebar);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components\\sidebar\\sidebar.component.js","/components\\sidebar")
-},{"buffer":22,"e/U+97":25}],5:[function(require,module,exports){
+},{"buffer":22,"e/U+97":25}],4:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var app = angular.module('driveMonitor', ['ui.router', 'ngFileUpload', 'ngImgCrop']);
 
@@ -191,8 +211,8 @@ require('./modules/index.js');
 require('./features/index.js');
 
 angular.bootstrap(document, ['driveMonitor']);
-}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_1b577b77.js","/")
-},{"./components/index.js":1,"./features/index.js":9,"./modules/index.js":15,"buffer":22,"e/U+97":25}],6:[function(require,module,exports){
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_4ecfd40f.js","/")
+},{"./components/index.js":1,"./features/index.js":8,"./modules/index.js":15,"buffer":22,"e/U+97":25}],5:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     var authenticationService = function ($http, $window, UserAPIService, User) {
@@ -250,7 +270,7 @@ angular.bootstrap(document, ['driveMonitor']);
             saveToken: saveToken,
             getToken: getToken,
             isLoggedIn: isLoggedIn,
-            regiser: register,
+            register: register,
             login: login,
             logout: logout,
             setCurrentUser: setCurrentUser,
@@ -262,7 +282,7 @@ angular.bootstrap(document, ['driveMonitor']);
 
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\authentication\\authentication.service.js","/features\\authentication")
-},{"buffer":22,"e/U+97":25}],7:[function(require,module,exports){
+},{"buffer":22,"e/U+97":25}],6:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     var displayHour = function () {
@@ -274,7 +294,7 @@ angular.bootstrap(document, ['driveMonitor']);
     angular.module('driveMonitor').filter('displayHour', displayHour);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\datetime\\datetime.filter.js","/features\\datetime")
-},{"buffer":22,"e/U+97":25}],8:[function(require,module,exports){
+},{"buffer":22,"e/U+97":25}],7:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     var dateTimeService = function () {
@@ -285,21 +305,48 @@ angular.bootstrap(document, ['driveMonitor']);
             for (var i = 0; i < 24; i++) {
                 hours.splice(2 * i, 0, {
                     hour: i,
-                    minute: 0
+                    minute: 0,
+                    show: true
                 }, {
                     hour: i,
-                    minute: 30
+                    minute: 30,
+                    show: false
                 });
             }
             return hours;
         };
 
         var getWeekDays = function (date) {
-            var daysOfWeek = [];
-            for (var i = 0; i < 7; i++) {
-                var today = date.setTime(date.getTime() + i * ticsPerDay);
-                daysOfWeek.push(today);
-            }
+            var daysOfWeek = [
+                {
+                    value: 0,
+                    text: 'Lun'
+                },
+                {
+                    value: 1,
+                    text: 'Mar'
+                },
+                {
+                    value: 2,
+                    text: 'Mer'
+                },
+                {
+                    value: 3,
+                    text: 'Jeu'
+                },
+                {
+                    value: 4,
+                    text: 'Ven'
+                },
+                {
+                    value: 5,
+                    text: 'Sam'
+                },
+                {
+                    value: 6,
+                    text: 'Dim'
+                }
+            ];
             return daysOfWeek;
         };
 
@@ -312,8 +359,9 @@ angular.bootstrap(document, ['driveMonitor']);
     angular.module('driveMonitor').service('DateTimeService', dateTimeService);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\datetime\\datetime.service.js","/features\\datetime")
-},{"buffer":22,"e/U+97":25}],9:[function(require,module,exports){
+},{"buffer":22,"e/U+97":25}],8:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+require('./map/location.directive.js');
 require('./datetime/datetime.filter.js');
 require('./datetime/datetime.service.js');
 require('./user/user.model.js');
@@ -322,7 +370,60 @@ require('./user/userAPI.service.js');
 require('./authentication/authentication.service.js');
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\index.js","/features")
-},{"./authentication/authentication.service.js":6,"./datetime/datetime.filter.js":7,"./datetime/datetime.service.js":8,"./user/user.model.js":10,"./user/user.service.js":11,"./user/userAPI.service.js":12,"buffer":22,"e/U+97":25}],10:[function(require,module,exports){
+},{"./authentication/authentication.service.js":5,"./datetime/datetime.filter.js":6,"./datetime/datetime.service.js":7,"./map/location.directive.js":9,"./user/user.model.js":10,"./user/user.service.js":11,"./user/userAPI.service.js":12,"buffer":22,"e/U+97":25}],9:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+(function () {
+
+    var googlePlace = ['_', function (_) {
+        return {
+            restrict: 'A',
+            require: 'ngModel',
+            link: function (scope, element, attrs, model) {
+                var options = {
+                    types: [],
+                    componentRestrictions: {}
+                };
+
+                var REGION_TYPE = 'administrative_area_level_1';
+                var DEPARTMENT_TYPE = 'administrative_area_level_2';
+                var CITY_TYPE = 'locality';
+                var COUNTRY_TYPE = 'country';
+                var STREET_NUMBER_TYPE = 'country';
+
+                scope.gPlace = new google.maps.places.Autocomplete(element[0], options);
+
+                google.maps.event.addListener(scope.gPlace, 'place_changed', function () {
+                    var addressComponents = scope.gPlace.getPlace().address_components;
+
+                    var address = {
+                        city: filterAddressComponent(addressComponents, CITY_TYPE),
+                        department: filterAddressComponent(addressComponents, DEPARTMENT_TYPE),
+                        region: filterAddressComponent(addressComponents, REGION_TYPE),
+                        country: filterAddressComponent(addressComponents, COUNTRY_TYPE)
+                    };
+
+                    scope.$apply(function () {
+                        model.$setViewValue(address);
+                    });
+                });
+
+                function filterAddressComponent(addressComponents, addressType) {
+                    var addressComponent = _.find(addressComponents, function (ac) {
+                        return ac.types.indexOf(addressType) !== -1;
+                    });
+
+                    if (addressComponent) {
+                        return addressComponent.long_name;
+                    }
+                }
+            }
+        };
+    }];
+
+    angular.module('driveMonitor').directive('googlePlace', googlePlace);
+})();
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\map\\location.directive.js","/features\\map")
+},{"buffer":22,"e/U+97":25}],10:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
 
@@ -330,7 +431,7 @@ require('./authentication/authentication.service.js');
         var defaultPhotoUrl = 'http://media.npr.org/assets/news/2009/10/27/facebook1_sq-17f6f5e06d5742d8c53576f7c13d5cf7158202a9.jpg?s=16';
 
         class User {
-            constructor(id, email, name, location, phone, birth, image, isMonitor, announcement) {
+            constructor(id, email, name, location, phone, birth, image, isMonitor, announcement, schedule) {
                 this.id = id;
                 this.email = email;
                 this.name = name;
@@ -340,6 +441,7 @@ require('./authentication/authentication.service.js');
                 this.imageUrl = (image && image.data) ? 'data:' + image.contentType + ';base64,' + image.data : defaultPhotoUrl;
                 this.isMonitor = isMonitor;
                 this.announcement = announcement;
+                this.schedule = schedule;
             }
         }
 
@@ -372,7 +474,7 @@ require('./authentication/authentication.service.js');
                 }
             }).then(function (result) {
                 return _.map(result.data, function(u){
-                    return new User(u._id, u.email, u.name, u.location, u.phone, u.birth, u.image, u.isMonitor, u.announcement);
+                    return new User(u._id, u.email, u.name, u.location, u.phone, u.birth, u.image, u.isMonitor, u.announcement, u.schedule);
                 });
             });
         };
@@ -383,7 +485,7 @@ require('./authentication/authentication.service.js');
                 method: "GET"
             }).then(function (result) {
                 var u = result.data;
-                return new User(u._id, u.email, u.name, u.location, u.phone, u.birth, u.image, u.isMonitor, u.announcement);
+                return new User(u._id, u.email, u.name, u.location, u.phone, u.birth, u.image, u.isMonitor, u.announcement, u.schedule);
             });
         };
 
@@ -440,7 +542,7 @@ require('./authentication/authentication.service.js');
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\app\\myApp.js","/modules\\app")
 },{"buffer":22,"e/U+97":25}],14:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-(function() {
+(function () {
     "use strict";
 
     var homePage = {
@@ -448,13 +550,16 @@ require('./authentication/authentication.service.js');
             users: '<'
         },
         templateUrl: "template/modules/home/home.html",
-        controller: function($scope, User){
+        controller: ['$scope', 'User', function ($scope, User) {
             var self = this;
-        }
+
+            self.onSubmit = function () {
+                console.log(self.searchPlace);
+            };
+        }]
     };
     angular.module('driveMonitor').component('homePage', homePage);
 })();
-
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\home\\home.js","/modules\\home")
 },{"buffer":22,"e/U+97":25}],15:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
@@ -475,13 +580,45 @@ require('./lesson/lesson.js');
             user: '<'
         },
         templateUrl: 'template/modules/lesson/lesson.html',
-        controller: function (UserAPIService) {
+        controller: function ($scope, UserAPIService) {
             var self = this;
-            
+
             self.onSubmit = function () {
-                self.user.isMonitor = true;
-                UserAPIService.update(self.user.id, _.pick(self.user, ['announcement', 'phone', 'isMonitor']));
+                updateUser();
             };
+
+            function updateUser() {
+                self.user.isMonitor = true;
+                UserAPIService.update(self.user.id, _.pick(self.user, ['announcement', 'phone', 'isMonitor', 'schedule']));
+            }
+
+            self.$onInit = function () {
+                console.log(self.user);
+                // self.user.schedule = self.user.schedule || [{
+                //     day: 0,
+                //     ranges: []
+                // }, {
+                //     day: 1,
+                //     ranges: []
+                // }, {
+                //     day: 2,
+                //     ranges: []
+                // }, {
+                //     day: 3,
+                //     ranges: []
+                // }, {
+                //     day: 4,
+                //     ranges: []
+                // }, {
+                //     day: 5,
+                //     ranges: []
+                // }, {
+                //     day: 6,
+                //     ranges: []
+                // }];
+            };
+
+
         }
     };
 
@@ -564,9 +701,9 @@ require('./lesson/lesson.js');
         controller: function ($scope, $window, $timeout, Upload, UserAPIService) {
             var self = this;
             
-            self.avatarUrl = self.user.image && self.user.image.data ?
-                'data:' + self.user.image.contentType + ';base64,' + self.user.image.data :
-                'http://media.npr.org/assets/news/2009/10/27/facebook1_sq-17f6f5e06d5742d8c53576f7c13d5cf7158202a9.jpg?s=16';
+            // self.avatarUrl = self.user.image && self.user.image.data ?
+            //     'data:' + self.user.image.contentType + ';base64,' + self.user.image.data :
+            //     'http://media.npr.org/assets/news/2009/10/27/facebook1_sq-17f6f5e06d5742d8c53576f7c13d5cf7158202a9.jpg?s=16';
 
             self.onSubmit = function () {
                 UserAPIService.update(self.user.id, _.omit(self.user, ['id', 'email', 'roles', 'image'])).then(function () {
@@ -19098,4 +19235,4 @@ process.chdir = function (dir) {
 };
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\process\\browser.js","/..\\..\\node_modules\\process")
-},{"buffer":22,"e/U+97":25}]},{},[5])
+},{"buffer":22,"e/U+97":25}]},{},[4])

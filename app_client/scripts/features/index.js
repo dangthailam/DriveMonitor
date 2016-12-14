@@ -1,3 +1,4 @@
+require('./map/location.directive.js');
 require('./datetime/datetime.filter.js');
 require('./datetime/datetime.service.js');
 require('./user/user.model.js');

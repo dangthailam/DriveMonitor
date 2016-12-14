@@ -1,35 +1,52 @@
-<div class="container">
-    <div class="row form-group">
-        <div class="col-xs-1">
-            <a>
-                <i class="fa fa-chevron-left float-xs-left" aria-hidden="true"></i>
-            </a>
+<div class="container form-group">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="table-responsive">
+                <table class="schedule-edit">
+                    <thead>
+                        <tr>
+                            <td class="cell-nothing"></td>
+                            <td ng-repeat="day in $ctrl.weekDays">
+                                <span>{{ day.text }}</span>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="height: 1px">
+                            <td></td>
+                            <td colspan="{{$ctrl.weekDays.length}}">
+                                <div style="position: relative">
+                                    <div style="position: absolute; width: 100%;">
+                                        <div ng-repeat="hour in $ctrl.dayHours | filter:{show:false}" class="row-hour-wrapper">
+                                            <div class="row-hour-range"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="col-hour">
+                                <div ng-repeat="hour in $ctrl.dayHours">
+                                    <div class="time-hour" ng-class="{'time-hour-last': $last}">
+                                        <span ng-if="hour.show">{{ hour | displayHour }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td ng-repeat="day in $ctrl.weekDays" class="col-marker" ng-class="{'col-marker-last': $last}">
+                                <div class="colSelect{{$index}} col-wrapper" ng-mousedown="$ctrl.beginDragging($event, day)" ng-mousemove="$ctrl.onDragging($event, day)"></div>
+                                <div class="colOver{{$index}} col-overlay">
+                                    <div class="time-marked" ng-repeat="range in $ctrl.schedule[day.value].ranges" ng-mousemove="$ctrl.onDragging($event, day)" ng-style="{'height': ((range.endIndex - range.startIndex) * 21) + 'px', 'top': (range.startIndex * 21) + 'px'}">
+                                        <span ng-click="$ctrl.removeThisHour(range, day.value)">
+                                            {{ $ctrl.dayHours[range.startIndex] | displayHour }} - {{ $ctrl.dayHours[range.endIndex] | displayHour }}
+                                            <i class="fa fa-times" aria-hidden="true"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <div class="col-xs-10 text-xs-center">
-            {{ $ctrl.weekDays[0] | date: 'dd/MM/yyyy' }} - {{ $ctrl.weekDays[6] | date: 'dd/MM/yyyy' }}
-        </div>
-        <div class="col-xs-1">
-            <a>
-                <i class="fa fa-chevron-right float-xs-right" aria-hidden="true"></i>
-            </a>
-        </div>
-    </div>
-    <div class="table-responsive">
-        <table class="table table-bordered schedule-edit">
-            <thead>
-                <tr>
-                    <td></td>
-                    <td ng-repeat="day in $ctrl.weekDays">{{ day | date: 'EEE dd/MM' }}</td>
-                </tr>
-            </thead>
-            <tbody>
-                <tr ng-repeat="hour in $ctrl.dayHours">
-                    <td>
-                        <span ng-if="hour.minute == 0">{{ hour | displayHour }}</span>
-                    </td>
-                    <td ng-repeat="day in $ctrl.weekDays" class="work-hour"></td>
-                </tr>
-            </tbody>
-        </table>
     </div>
 </div>

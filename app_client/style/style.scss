@@ -7,6 +7,9 @@ body {
     a {
         cursor: pointer;
     }
+    [ng-click] {
+        cursor: pointer;
+    }
 }
 
 img.logo {

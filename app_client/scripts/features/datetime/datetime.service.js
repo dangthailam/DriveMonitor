@@ -7,21 +7,48 @@
             for (var i = 0; i < 24; i++) {
                 hours.splice(2 * i, 0, {
                     hour: i,
-                    minute: 0
+                    minute: 0,
+                    show: true
                 }, {
                     hour: i,
-                    minute: 30
+                    minute: 30,
+                    show: false
                 });
             }
             return hours;
         };
 
         var getWeekDays = function (date) {
-            var daysOfWeek = [];
-            for (var i = 0; i < 7; i++) {
-                var today = date.setTime(date.getTime() + i * ticsPerDay);
-                daysOfWeek.push(today);
-            }
+            var daysOfWeek = [
+                {
+                    value: 0,
+                    text: 'Lun'
+                },
+                {
+                    value: 1,
+                    text: 'Mar'
+                },
+                {
+                    value: 2,
+                    text: 'Mer'
+                },
+                {
+                    value: 3,
+                    text: 'Jeu'
+                },
+                {
+                    value: 4,
+                    text: 'Ven'
+                },
+                {
+                    value: 5,
+                    text: 'Sam'
+                },
+                {
+                    value: 6,
+                    text: 'Dim'
+                }
+            ];
             return daysOfWeek;
         };
 

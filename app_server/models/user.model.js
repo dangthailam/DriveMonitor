@@ -1,5 +1,3 @@
-require('./schedule.model');
-
 (function () {
     var mongoose = require('mongoose');
     var crypto = require('crypto');
@@ -43,9 +41,12 @@ require('./schedule.model');
             city: String,
             postal: String
         },
-        scheduleRange: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Schedule'
+        schedule: [{
+            day: Number,
+            ranges: [{
+                startIndex: Number,
+                endIndex: Number
+            }]
         }],
         hash: String,
         salt: String

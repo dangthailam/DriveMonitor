@@ -14,7 +14,7 @@
                 }
             }).then(function (result) {
                 return _.map(result.data, function(u){
-                    return new User(u._id, u.email, u.name, u.location, u.phone, u.birth, u.image, u.isMonitor, u.announcement);
+                    return new User(u._id, u.email, u.name, u.location, u.phone, u.birth, u.image, u.isMonitor, u.announcement, u.schedule);
                 });
             });
         };
@@ -25,7 +25,7 @@
                 method: "GET"
             }).then(function (result) {
                 var u = result.data;
-                return new User(u._id, u.email, u.name, u.location, u.phone, u.birth, u.image, u.isMonitor, u.announcement);
+                return new User(u._id, u.email, u.name, u.location, u.phone, u.birth, u.image, u.isMonitor, u.announcement, u.schedule);
             });
         };
 

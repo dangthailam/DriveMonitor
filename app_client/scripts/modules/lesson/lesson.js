@@ -4,13 +4,45 @@
             user: '<'
         },
         templateUrl: 'template/modules/lesson/lesson.html',
-        controller: function (UserAPIService) {
+        controller: function ($scope, UserAPIService) {
             var self = this;
-            
+
             self.onSubmit = function () {
-                self.user.isMonitor = true;
-                UserAPIService.update(self.user.id, _.pick(self.user, ['announcement', 'phone', 'isMonitor']));
+                updateUser();
             };
+
+            function updateUser() {
+                self.user.isMonitor = true;
+                UserAPIService.update(self.user.id, _.pick(self.user, ['announcement', 'phone', 'isMonitor', 'schedule']));
+            }
+
+            self.$onInit = function () {
+                console.log(self.user);
+                // self.user.schedule = self.user.schedule || [{
+                //     day: 0,
+                //     ranges: []
+                // }, {
+                //     day: 1,
+                //     ranges: []
+                // }, {
+                //     day: 2,
+                //     ranges: []
+                // }, {
+                //     day: 3,
+                //     ranges: []
+                // }, {
+                //     day: 4,
+                //     ranges: []
+                // }, {
+                //     day: 5,
+                //     ranges: []
+                // }, {
+                //     day: 6,
+                //     ranges: []
+                // }];
+            };
+
+
         }
     };
 

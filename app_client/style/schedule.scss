@@ -1,16 +1,93 @@
+$line-height: 21;
 .schedule-edit {
-    thead tr td{
-        text-align: center;
+    width: 100%;
+    border-bottom: 1px solid #ddd;
+    thead td {
+        border-top: 1px solid #ddd;
+        border-right: 1px solid #ddd;
     }
-    
-    td{
-        cursor: n-resize;
-        padding: 0 10px;
-        height: 20px;
-        line-height: 20px;
-
-        &.highlighted{
-            background-color: #98fb98;
+    td {
+        text-align: center;
+        padding: 0;
+        &.cell-nothing {
+            width: 60px;
+            border-top: none;
+            border-left: none;
+            border-right: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+        }
+        &.col-marker {
+            border-left: 1px solid #ddd;
+            position: relative;
+        }
+        &.col-marker-last{
+            border-right: 1px solid #ddd;
+        }
+        &.col-hour {
+            border-left: 1px solid #ddd;
+            padding: 0;
+            user-select: none;
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
+        div.time-hour {
+            height: $line-height + px;
+            border-bottom: 1px solid #ddd;
+            text-align: right;
+            font-size: 12px;
+            padding-right: 2px;
+        }
+        div.time-hour-last {
+            border-bottom: none;
+        }
+        div.col-wrapper {
+            width: 100%;
+            height: $line-height * 48px;
+            position: relative;
+            cursor: default;
+        }
+        div.col-overlay {
+            position: relative;
+            top: -$line-height * 48px;
+            width: 100%;
+        }
+        div.time-marked {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            z-index: 1;
+            line-height: 1;
+            border: 1px solid rgb(21, 135, 189);
+            background-color: rgb(159, 198, 231);
+            user-select: none;
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            span {
+                font-size: 12px;
+                i.fa-times {
+                    visibility: hidden;
+                    &:hover {
+                        font-size: 14px;
+                    }
+                }
+            }
+            &:hover {
+                i.fa-times {
+                    visibility: visible;
+                }
+            }
+        }
+        div.row-hour-range {
+            box-sizing: initial;
+            height: 20px;
+            margin-bottom: 20px;
+            border-bottom: 1px dotted #ddd;
+            border-top: 1px solid #ddd;
+        }
+        div.row-hour-wrapper {
+            height: $line-height * 2px;
         }
     }
 }

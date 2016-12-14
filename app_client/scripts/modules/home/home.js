@@ -1,4 +1,4 @@
-(function() {
+(function () {
     "use strict";
 
     var homePage = {
@@ -6,9 +6,13 @@
             users: '<'
         },
         templateUrl: "template/modules/home/home.html",
-        controller: function($scope, User){
+        controller: ['$scope', 'User', function ($scope, User) {
             var self = this;
-        }
+
+            self.onSubmit = function () {
+                console.log(self.searchPlace);
+            };
+        }]
     };
     angular.module('driveMonitor').component('homePage', homePage);
 })();
