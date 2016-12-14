@@ -48,6 +48,6 @@ Temporary Items
 
 #App
 node_modules/
-Content/*
+Content/
 server.json
 gulpfile.js
