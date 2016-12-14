@@ -17,29 +17,28 @@
             }
 
             self.$onInit = function () {
-                console.log(self.user);
-                // self.user.schedule = self.user.schedule || [{
-                //     day: 0,
-                //     ranges: []
-                // }, {
-                //     day: 1,
-                //     ranges: []
-                // }, {
-                //     day: 2,
-                //     ranges: []
-                // }, {
-                //     day: 3,
-                //     ranges: []
-                // }, {
-                //     day: 4,
-                //     ranges: []
-                // }, {
-                //     day: 5,
-                //     ranges: []
-                // }, {
-                //     day: 6,
-                //     ranges: []
-                // }];
+                self.user.schedule = self.user.schedule || [{
+                    day: 0,
+                    ranges: []
+                }, {
+                    day: 1,
+                    ranges: []
+                }, {
+                    day: 2,
+                    ranges: []
+                }, {
+                    day: 3,
+                    ranges: []
+                }, {
+                    day: 4,
+                    ranges: []
+                }, {
+                    day: 5,
+                    ranges: []
+                }, {
+                    day: 6,
+                    ranges: []
+                }];
             };
 
 

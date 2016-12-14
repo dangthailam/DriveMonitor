@@ -211,7 +211,7 @@ require('./modules/index.js');
 require('./features/index.js');
 
 angular.bootstrap(document, ['driveMonitor']);
-}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_4ecfd40f.js","/")
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_b7f498e2.js","/")
 },{"./components/index.js":1,"./features/index.js":8,"./modules/index.js":15,"buffer":22,"e/U+97":25}],5:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
@@ -593,29 +593,28 @@ require('./lesson/lesson.js');
             }
 
             self.$onInit = function () {
-                console.log(self.user);
-                // self.user.schedule = self.user.schedule || [{
-                //     day: 0,
-                //     ranges: []
-                // }, {
-                //     day: 1,
-                //     ranges: []
-                // }, {
-                //     day: 2,
-                //     ranges: []
-                // }, {
-                //     day: 3,
-                //     ranges: []
-                // }, {
-                //     day: 4,
-                //     ranges: []
-                // }, {
-                //     day: 5,
-                //     ranges: []
-                // }, {
-                //     day: 6,
-                //     ranges: []
-                // }];
+                self.user.schedule = self.user.schedule || [{
+                    day: 0,
+                    ranges: []
+                }, {
+                    day: 1,
+                    ranges: []
+                }, {
+                    day: 2,
+                    ranges: []
+                }, {
+                    day: 3,
+                    ranges: []
+                }, {
+                    day: 4,
+                    ranges: []
+                }, {
+                    day: 5,
+                    ranges: []
+                }, {
+                    day: 6,
+                    ranges: []
+                }];
             };
 
 
