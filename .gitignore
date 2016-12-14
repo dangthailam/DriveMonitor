@@ -49,3 +49,4 @@ Temporary Items
 #App
 node_modules
 server.json
+gulpfile.js
