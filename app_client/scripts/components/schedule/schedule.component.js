@@ -12,7 +12,7 @@
             var day = null;
             var draggingHourIndex = null;
             var beginHourIndex = null;
-            console.log(self.schedule);
+            
             self.$onInit = function () {
                 self.weekDays = DateTimeService.getWeekDays(new Date());
                 self.dayHours = DateTimeService.getDayHours();

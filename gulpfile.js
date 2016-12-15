@@ -7,7 +7,7 @@ const nodemon = require('gulp-nodemon');
 
 gulp.task('default', ['templates', 'css', 'vendor', 'scripts']);
 
-gulp.task('watch', function () {
+gulp.task('watch', ['templates', 'css', 'vendor', 'scripts'], function () {
     gulp.watch('./app_client/scripts/**/*html', ['templates']);
     gulp.watch(['./app_client/style/**/*.css', './app_client/style/**/*.scss'], ['css']);
     gulp.watch('./app_client/scripts/**/*.js', ['scripts']);

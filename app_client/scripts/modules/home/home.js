@@ -6,11 +6,13 @@
             users: '<'
         },
         templateUrl: "template/modules/home/home.html",
-        controller: ['$scope', 'User', function ($scope, User) {
+        controller: ['$scope', 'UserAPIService', 'User', function ($scope, UserAPIService, User) {
             var self = this;
 
             self.onSubmit = function () {
-                console.log(self.searchPlace);
+                UserAPIService.search(self.searchPlace, 10, 1).then(function (result) {
+                    console.log(result);
+                });
             };
         }]
     };

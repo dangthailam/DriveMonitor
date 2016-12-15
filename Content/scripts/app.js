@@ -20,7 +20,7 @@ require('./schedule/schedule.component.js');
             var day = null;
             var draggingHourIndex = null;
             var beginHourIndex = null;
-            console.log(self.schedule);
+            
             self.$onInit = function () {
                 self.weekDays = DateTimeService.getWeekDays(new Date());
                 self.dayHours = DateTimeService.getDayHours();
@@ -211,7 +211,7 @@ require('./modules/index.js');
 require('./features/index.js');
 
 angular.bootstrap(document, ['driveMonitor']);
-}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_b7f498e2.js","/")
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_2a496c7c.js","/")
 },{"./components/index.js":1,"./features/index.js":8,"./modules/index.js":15,"buffer":22,"e/U+97":25}],5:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
@@ -264,6 +264,7 @@ angular.bootstrap(document, ['driveMonitor']);
 
         var logout = function () {
             $window.localStorage.removeItem('mean-token');
+            _currentUser = null;
         };
 
         return {
@@ -317,42 +318,60 @@ angular.bootstrap(document, ['driveMonitor']);
         };
 
         var getWeekDays = function (date) {
-            var daysOfWeek = [
-                {
-                    value: 0,
-                    text: 'Lun'
-                },
-                {
-                    value: 1,
-                    text: 'Mar'
-                },
-                {
-                    value: 2,
-                    text: 'Mer'
-                },
-                {
-                    value: 3,
-                    text: 'Jeu'
-                },
-                {
-                    value: 4,
-                    text: 'Ven'
-                },
-                {
-                    value: 5,
-                    text: 'Sam'
-                },
-                {
-                    value: 6,
-                    text: 'Dim'
-                }
-            ];
+            var daysOfWeek = [{
+                value: 0,
+                text: 'Lun'
+            }, {
+                value: 1,
+                text: 'Mar'
+            }, {
+                value: 2,
+                text: 'Mer'
+            }, {
+                value: 3,
+                text: 'Jeu'
+            }, {
+                value: 4,
+                text: 'Ven'
+            }, {
+                value: 5,
+                text: 'Sam'
+            }, {
+                value: 6,
+                text: 'Dim'
+            }];
             return daysOfWeek;
+        };
+
+        var generateNewSchedule = function () {
+            return [{
+                day: 0,
+                ranges: []
+            }, {
+                day: 1,
+                ranges: []
+            }, {
+                day: 2,
+                ranges: []
+            }, {
+                day: 3,
+                ranges: []
+            }, {
+                day: 4,
+                ranges: []
+            }, {
+                day: 5,
+                ranges: []
+            }, {
+                day: 6,
+                ranges: []
+            }];
         };
 
         return {
             getWeekDays: getWeekDays,
-            getDayHours: getDayHours
+            getDayHours: getDayHours,
+            generateNewSchedule: generateNewSchedule
         };
     };
 
@@ -388,14 +407,17 @@ require('./authentication/authentication.service.js');
                 var DEPARTMENT_TYPE = 'administrative_area_level_2';
                 var CITY_TYPE = 'locality';
                 var COUNTRY_TYPE = 'country';
-                var STREET_NUMBER_TYPE = 'country';
+                var STREET_NUMBER_TYPE = 'street_number';
+                var STREET_TYPE = 'route';
 
                 scope.gPlace = new google.maps.places.Autocomplete(element[0], options);
 
                 google.maps.event.addListener(scope.gPlace, 'place_changed', function () {
                     var addressComponents = scope.gPlace.getPlace().address_components;
-
+                    
                     var address = {
+                        streetNumber: filterAddressComponent(addressComponents, STREET_NUMBER_TYPE),
+                        street: filterAddressComponent(addressComponents, STREET_TYPE),
                         city: filterAddressComponent(addressComponents, CITY_TYPE),
                         department: filterAddressComponent(addressComponents, DEPARTMENT_TYPE),
                         region: filterAddressComponent(addressComponents, REGION_TYPE),
@@ -473,7 +495,7 @@ require('./authentication/authentication.service.js');
                     isMonitor: isMonitor
                 }
             }).then(function (result) {
-                return _.map(result.data, function(u){
+                return _.map(result.data, function (u) {
                     return new User(u._id, u.email, u.name, u.location, u.phone, u.birth, u.image, u.isMonitor, u.announcement, u.schedule);
                 });
             });
@@ -505,10 +527,26 @@ require('./authentication/authentication.service.js');
             return $http.post('/token', user);
         };
 
+        var search = function (query, quantityPerPage, pageNumber) {
+            query.quantityPerPage = quantityPerPage;
+            query.pageNumber = pageNumber;
+            return $http({
+                url: '/users',
+                method: "GET",
+                params: query
+            }).then(function (result) {
+                return result;
+                // return _.map(result.data, function (u) {
+                //     return new User(u._id, u.email, u.name, u.location, u.phone, u.birth, u.image, u.isMonitor, u.announcement, u.schedule);
+                // });
+            });
+        };
+
         return {
             update: update,
             getUsers: getUsers,
             getUser: getUser,
+            search: search,
             updateProfilePicture: updateProfilePicture,
             register: register,
             login: login
@@ -550,11 +588,13 @@ require('./authentication/authentication.service.js');
             users: '<'
         },
         templateUrl: "template/modules/home/home.html",
-        controller: ['$scope', 'User', function ($scope, User) {
+        controller: ['$scope', 'UserAPIService', 'User', function ($scope, UserAPIService, User) {
             var self = this;
 
             self.onSubmit = function () {
-                console.log(self.searchPlace);
+                UserAPIService.search(self.searchPlace, 10, 1).then(function (result) {
+                    console.log(result);
+                });
             };
         }]
     };
@@ -580,7 +620,7 @@ require('./lesson/lesson.js');
             user: '<'
         },
         templateUrl: 'template/modules/lesson/lesson.html',
-        controller: function ($scope, UserAPIService) {
+        controller: function ($scope, UserAPIService, DateTimeService) {
             var self = this;
 
             self.onSubmit = function () {
@@ -593,31 +633,9 @@ require('./lesson/lesson.js');
             }
 
             self.$onInit = function () {
-                self.user.schedule = self.user.schedule || [{
-                    day: 0,
-                    ranges: []
-                }, {
-                    day: 1,
-                    ranges: []
-                }, {
-                    day: 2,
-                    ranges: []
-                }, {
-                    day: 3,
-                    ranges: []
-                }, {
-                    day: 4,
-                    ranges: []
-                }, {
-                    day: 5,
-                    ranges: []
-                }, {
-                    day: 6,
-                    ranges: []
-                }];
+                if(!self.user.schedule || !self.user.schedule.length)
+                    self.user.schedule = DateTimeService.generateNewSchedule();
             };
-
-
         }
     };
 

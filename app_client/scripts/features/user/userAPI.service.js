@@ -13,7 +13,7 @@
                     isMonitor: isMonitor
                 }
             }).then(function (result) {
-                return _.map(result.data, function(u){
+                return _.map(result.data, function (u) {
                     return new User(u._id, u.email, u.name, u.location, u.phone, u.birth, u.image, u.isMonitor, u.announcement, u.schedule);
                 });
             });
@@ -45,10 +45,26 @@
             return $http.post('/token', user);
         };
 
+        var search = function (query, quantityPerPage, pageNumber) {
+            query.quantityPerPage = quantityPerPage;
+            query.pageNumber = pageNumber;
+            return $http({
+                url: '/users',
+                method: "GET",
+                params: query
+            }).then(function (result) {
+                return result;
+                // return _.map(result.data, function (u) {
+                //     return new User(u._id, u.email, u.name, u.location, u.phone, u.birth, u.image, u.isMonitor, u.announcement, u.schedule);
+                // });
+            });
+        };
+
         return {
             update: update,
             getUsers: getUsers,
             getUser: getUser,
+            search: search,
             updateProfilePicture: updateProfilePicture,
             register: register,
             login: login

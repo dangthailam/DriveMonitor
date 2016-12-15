@@ -4,7 +4,7 @@
             user: '<'
         },
         templateUrl: 'template/modules/lesson/lesson.html',
-        controller: function ($scope, UserAPIService) {
+        controller: function ($scope, UserAPIService, DateTimeService) {
             var self = this;
 
             self.onSubmit = function () {
@@ -17,31 +17,9 @@
             }
 
             self.$onInit = function () {
-                self.user.schedule = self.user.schedule || [{
-                    day: 0,
-                    ranges: []
-                }, {
-                    day: 1,
-                    ranges: []
-                }, {
-                    day: 2,
-                    ranges: []
-                }, {
-                    day: 3,
-                    ranges: []
-                }, {
-                    day: 4,
-                    ranges: []
-                }, {
-                    day: 5,
-                    ranges: []
-                }, {
-                    day: 6,
-                    ranges: []
-                }];
+                if(!self.user.schedule || !self.user.schedule.length)
+                    self.user.schedule = DateTimeService.generateNewSchedule();
             };
-
-
         }
     };
 

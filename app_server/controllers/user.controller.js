@@ -28,18 +28,6 @@ var findById = function (req, res) {
     });
 };
 
-var all = function (req, res) {
-    User.find({}, function (err, users) {
-        if (err) {
-            res.status(400).json(err);
-            return;
-        }
-        res.status(200).json(_.map(users, function (u) {
-            return u.export();
-        }));
-    });
-};
-
 var update = function (req, res) {
     User.findById(req.params.userId, function (err, user) {
         if (err) {
@@ -62,15 +50,37 @@ var update = function (req, res) {
 };
 
 var getMany = function (req, res) {
-    var quantity = parseInt(req.query.quantity);
+    if (req.query.country && req.query.pageNumber && req.query.quantityPerPage) {
+        var streetNumber = req.query.country;
+        var street = req.query.country;
+        var city = req.query.country;
+        var region = req.query.country;
+        var department = req.query.country;
+        var country = req.query.country;
+        var pageNumber = req.query.country;
+        var quantityPerPage = req.query.country;
 
-    if (!quantity) return all(req, res);
+        res.status(200).json(req.query);
+    } else {
+        var quantity = req.query.quantity ? parseInt(req.query.quantity) : null;
+        var isMonitor = req.query.isMonitor;
+        getUsers(req, res, quantity, isMonitor);
+    }
+};
 
-    var isMonitor = req.query.isMonitor;
-    
-    User.find({
-        'isMonitor': isMonitor
-    }).limit(quantity).exec(function (err, users) {
+function getUsers(req, res, quantity, isMonitor) {
+    if (isMonitor === null || isMonitor === undefined) {
+        users = User.find({});
+    } else {
+        users = User.find({
+            'isMonitor': isMonitor
+        });
+    }
+    if (quantity) {
+        users = users.limit(quantity);
+    }
+
+    users.exec(function (err, users) {
         if (err) {
             res.status(400).json(err);
             return;
@@ -79,7 +89,7 @@ var getMany = function (req, res) {
             return u.export();
         }));
     });
-};
+}
 
 var updateProfilePicture = function (req, res) {
     User.findById(req.params.userId, function (err, user) {
@@ -108,7 +118,6 @@ module.exports = {
     create: create,
     findById: findById,
     update: update,
-    all: all,
     getMany: getMany,
     updateProfilePicture: updateProfilePicture
 };

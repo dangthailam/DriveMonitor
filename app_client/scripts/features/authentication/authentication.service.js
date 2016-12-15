@@ -48,6 +48,7 @@
 
         var logout = function () {
             $window.localStorage.removeItem('mean-token');
+            _currentUser = null;
         };
 
         return {

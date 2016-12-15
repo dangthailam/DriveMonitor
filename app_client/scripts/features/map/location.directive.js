@@ -14,14 +14,17 @@
                 var DEPARTMENT_TYPE = 'administrative_area_level_2';
                 var CITY_TYPE = 'locality';
                 var COUNTRY_TYPE = 'country';
-                var STREET_NUMBER_TYPE = 'country';
+                var STREET_NUMBER_TYPE = 'street_number';
+                var STREET_TYPE = 'route';
 
                 scope.gPlace = new google.maps.places.Autocomplete(element[0], options);
 
                 google.maps.event.addListener(scope.gPlace, 'place_changed', function () {
                     var addressComponents = scope.gPlace.getPlace().address_components;
-
+                    
                     var address = {
+                        streetNumber: filterAddressComponent(addressComponents, STREET_NUMBER_TYPE),
+                        street: filterAddressComponent(addressComponents, STREET_TYPE),
                         city: filterAddressComponent(addressComponents, CITY_TYPE),
                         department: filterAddressComponent(addressComponents, DEPARTMENT_TYPE),
                         region: filterAddressComponent(addressComponents, REGION_TYPE),
