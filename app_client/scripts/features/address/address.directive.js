@@ -1,6 +1,6 @@
 (function () {
 
-    var googlePlace = ['_', function (_) {
+    var googlePlace = ['Address', '_', function (Address, _) {
         return {
             restrict: 'A',
             require: 'ngModel',
@@ -9,30 +9,35 @@
                     types: [],
                     componentRestrictions: {}
                 };
-
                 var REGION_TYPE = 'administrative_area_level_1';
                 var DEPARTMENT_TYPE = 'administrative_area_level_2';
                 var CITY_TYPE = 'locality';
                 var COUNTRY_TYPE = 'country';
                 var STREET_NUMBER_TYPE = 'street_number';
                 var STREET_TYPE = 'route';
+                var POSTAL_CODE_TYPE = 'postal_code';
 
                 scope.gPlace = new google.maps.places.Autocomplete(element[0], options);
 
                 google.maps.event.addListener(scope.gPlace, 'place_changed', function () {
-                    var addressComponents = scope.gPlace.getPlace().address_components;
-                    
-                    var address = {
-                        streetNumber: filterAddressComponent(addressComponents, STREET_NUMBER_TYPE),
-                        street: filterAddressComponent(addressComponents, STREET_TYPE),
-                        city: filterAddressComponent(addressComponents, CITY_TYPE),
-                        department: filterAddressComponent(addressComponents, DEPARTMENT_TYPE),
-                        region: filterAddressComponent(addressComponents, REGION_TYPE),
-                        country: filterAddressComponent(addressComponents, COUNTRY_TYPE)
-                    };
+                    var place = scope.gPlace.getPlace();
+                    var addressComponents = place.address_components;
+                    var location = new Address(
+                        $(element).val(),
+                        filterAddressComponent(addressComponents, STREET_NUMBER_TYPE),
+                        filterAddressComponent(addressComponents, STREET_TYPE),
+                        filterAddressComponent(addressComponents, CITY_TYPE),
+                        filterAddressComponent(addressComponents, DEPARTMENT_TYPE),
+                        filterAddressComponent(addressComponents, REGION_TYPE),
+                        filterAddressComponent(addressComponents, COUNTRY_TYPE),
+                        filterAddressComponent(addressComponents, POSTAL_CODE_TYPE),
+                        place.geometry.location.lat(),
+                        place.geometry.location.lng()
+                    );
 
                     scope.$apply(function () {
-                        model.$setViewValue(address);
+                        scope.location = location;
+                        model.$setViewValue($(element).val());
                     });
                 });
 

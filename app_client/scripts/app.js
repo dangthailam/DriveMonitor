@@ -55,14 +55,14 @@ angular.module('driveMonitor')
             template: "<profile-page user='user'></profile-page>",
             forConnectedUser: true,
             controller: function ($scope, loggedInUser, AuthenticationService) {
-                $scope.user = loggedInUser || AuthenticationService.getCurrentUser();
+                $scope.user = AuthenticationService.getCurrentUser();
             }
         }).state('app.lesson', {
             url: "/annonce",
             template: '<lesson-page user="user"></lesson-page>',
             forConnectedUser: true,
             controller: function ($scope, loggedInUser, AuthenticationService) {
-                $scope.user = loggedInUser || AuthenticationService.getCurrentUser();
+                $scope.user = AuthenticationService.getCurrentUser();
             }
         });
     }).run(function ($rootScope, $state, AuthenticationService) {

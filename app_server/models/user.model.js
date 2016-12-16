@@ -1,4 +1,6 @@
 (function () {
+    require('./address.model');
+
     var mongoose = require('mongoose');
     var crypto = require('crypto');
     var jwt = require('jsonwebtoken');
@@ -15,9 +17,8 @@
             required: true
         },
         location: {
-            address: String,
-            city: String,
-            postal: String
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Address'
         },
         phone: String,
         birth: {
@@ -37,9 +38,10 @@
             title: String,
             description: String,
             rate: String,
-            address: String,
-            city: String,
-            postal: String
+            location: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Address'
+            }
         },
         schedule: [{
             day: Number,

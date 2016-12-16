@@ -1,6 +1,7 @@
 (function () {
+    require('../announcement/announcement.model');
 
-    angular.module('driveMonitor').factory('User', function () {
+    angular.module('driveMonitor').factory('User', ['Announcement', function (Announcement) {
         var defaultPhotoUrl = 'http://media.npr.org/assets/news/2009/10/27/facebook1_sq-17f6f5e06d5742d8c53576f7c13d5cf7158202a9.jpg?s=16';
 
         class User {
@@ -13,12 +14,12 @@
                 this.birth = birth;
                 this.imageUrl = (image && image.data) ? 'data:' + image.contentType + ';base64,' + image.data : defaultPhotoUrl;
                 this.isMonitor = isMonitor;
-                this.announcement = announcement;
+                this.announcement = announcement || new Announcement();
                 this.schedule = schedule;
             }
         }
 
         return User;
-    });
+    }]);
 
 })();

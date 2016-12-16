@@ -4,7 +4,7 @@ require('./sidebar/sidebar.component.js');
 require('./schedule/schedule.component.js');
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components\\index.js","/components")
-},{"./schedule/schedule.component.js":2,"./sidebar/sidebar.component.js":3,"buffer":22,"e/U+97":25}],2:[function(require,module,exports){
+},{"./schedule/schedule.component.js":2,"./sidebar/sidebar.component.js":3,"buffer":24,"e/U+97":27}],2:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     var schedule = {
@@ -98,7 +98,7 @@ require('./schedule/schedule.component.js');
     angular.module('driveMonitor').component('schedule', schedule);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components\\schedule\\schedule.component.js","/components\\schedule")
-},{"buffer":22,"e/U+97":25}],3:[function(require,module,exports){
+},{"buffer":24,"e/U+97":27}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     "use strict";
@@ -122,7 +122,7 @@ require('./schedule/schedule.component.js');
     angular.module('driveMonitor').component('sideBar', sidebar);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components\\sidebar\\sidebar.component.js","/components\\sidebar")
-},{"buffer":22,"e/U+97":25}],4:[function(require,module,exports){
+},{"buffer":24,"e/U+97":27}],4:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var app = angular.module('driveMonitor', ['ui.router', 'ngFileUpload', 'ngImgCrop']);
 
@@ -181,14 +181,14 @@ angular.module('driveMonitor')
             template: "<profile-page user='user'></profile-page>",
             forConnectedUser: true,
             controller: function ($scope, loggedInUser, AuthenticationService) {
-                $scope.user = loggedInUser || AuthenticationService.getCurrentUser();
+                $scope.user = AuthenticationService.getCurrentUser();
             }
         }).state('app.lesson', {
             url: "/annonce",
             template: '<lesson-page user="user"></lesson-page>',
             forConnectedUser: true,
             controller: function ($scope, loggedInUser, AuthenticationService) {
-                $scope.user = loggedInUser || AuthenticationService.getCurrentUser();
+                $scope.user = AuthenticationService.getCurrentUser();
             }
         });
     }).run(function ($rootScope, $state, AuthenticationService) {
@@ -211,8 +211,111 @@ require('./modules/index.js');
 require('./features/index.js');
 
 angular.bootstrap(document, ['driveMonitor']);
-}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_2a496c7c.js","/")
-},{"./components/index.js":1,"./features/index.js":8,"./modules/index.js":15,"buffer":22,"e/U+97":25}],5:[function(require,module,exports){
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_39e3325.js","/")
+},{"./components/index.js":1,"./features/index.js":11,"./modules/index.js":17,"buffer":24,"e/U+97":27}],5:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+(function () {
+
+    var googlePlace = ['Address', '_', function (Address, _) {
+        return {
+            restrict: 'A',
+            require: 'ngModel',
+            link: function (scope, element, attrs, model) {
+                var options = {
+                    types: [],
+                    componentRestrictions: {}
+                };
+                var REGION_TYPE = 'administrative_area_level_1';
+                var DEPARTMENT_TYPE = 'administrative_area_level_2';
+                var CITY_TYPE = 'locality';
+                var COUNTRY_TYPE = 'country';
+                var STREET_NUMBER_TYPE = 'street_number';
+                var STREET_TYPE = 'route';
+                var POSTAL_CODE_TYPE = 'postal_code';
+
+                scope.gPlace = new google.maps.places.Autocomplete(element[0], options);
+
+                google.maps.event.addListener(scope.gPlace, 'place_changed', function () {
+                    var place = scope.gPlace.getPlace();
+                    var addressComponents = place.address_components;
+                    var location = new Address(
+                        $(element).val(),
+                        filterAddressComponent(addressComponents, STREET_NUMBER_TYPE),
+                        filterAddressComponent(addressComponents, STREET_TYPE),
+                        filterAddressComponent(addressComponents, CITY_TYPE),
+                        filterAddressComponent(addressComponents, DEPARTMENT_TYPE),
+                        filterAddressComponent(addressComponents, REGION_TYPE),
+                        filterAddressComponent(addressComponents, COUNTRY_TYPE),
+                        filterAddressComponent(addressComponents, POSTAL_CODE_TYPE),
+                        place.geometry.location.lat(),
+                        place.geometry.location.lng()
+                    );
+
+                    scope.$apply(function () {
+                        scope.location = location;
+                        model.$setViewValue($(element).val());
+                    });
+                });
+
+                function filterAddressComponent(addressComponents, addressType) {
+                    var addressComponent = _.find(addressComponents, function (ac) {
+                        return ac.types.indexOf(addressType) !== -1;
+                    });
+
+                    if (addressComponent) {
+                        return addressComponent.long_name;
+                    }
+                }
+            }
+        };
+    }];
+
+    angular.module('driveMonitor').directive('googlePlace', googlePlace);
+})();
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\address\\address.directive.js","/features\\address")
+},{"buffer":24,"e/U+97":27}],6:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+(function () {
+    angular.module('driveMonitor').factory('Address', [function () {
+        class Address {
+            constructor(address, streetNumber, street, city, department, region, country, postalCode, geoLattitude, geoLongtitude) {
+                this.address = address;
+                this.streetNumber = streetNumber;
+                this.street = street;
+                this.city = city;
+                this.department = department;
+                this.region = region;
+                this.country = country;
+                this.postalCode = postalCode;
+                this.geoLattitude = geoLattitude;
+                this.geoLongtitude = geoLongtitude;
+            }
+        }
+
+        return Address;
+    }]);
+})();
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\address\\address.model.js","/features\\address")
+},{"buffer":24,"e/U+97":27}],7:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+(function () {
+    require('../address/address.model');
+
+    angular.module('driveMonitor').factory('Announcement', ['Address', function (Address) {
+        class Announcement {
+            constructor(title, description, rate, location) {
+                this.title = title;
+                this.description = description;
+                this.rate = rate;
+                this.location = location || new Address();
+            }
+        }
+
+        return Announcement;
+    }]);
+})();
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\announcement\\announcement.model.js","/features\\announcement")
+},{"../address/address.model":6,"buffer":24,"e/U+97":27}],8:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     var authenticationService = function ($http, $window, UserAPIService, User) {
@@ -283,7 +386,7 @@ angular.bootstrap(document, ['driveMonitor']);
 
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\authentication\\authentication.service.js","/features\\authentication")
-},{"buffer":22,"e/U+97":25}],6:[function(require,module,exports){
+},{"buffer":24,"e/U+97":27}],9:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     var displayHour = function () {
@@ -295,7 +398,7 @@ angular.bootstrap(document, ['driveMonitor']);
     angular.module('driveMonitor').filter('displayHour', displayHour);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\datetime\\datetime.filter.js","/features\\datetime")
-},{"buffer":22,"e/U+97":25}],7:[function(require,module,exports){
+},{"buffer":24,"e/U+97":27}],10:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     var dateTimeService = function () {
@@ -378,9 +481,9 @@ angular.bootstrap(document, ['driveMonitor']);
     angular.module('driveMonitor').service('DateTimeService', dateTimeService);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\datetime\\datetime.service.js","/features\\datetime")
-},{"buffer":22,"e/U+97":25}],8:[function(require,module,exports){
+},{"buffer":24,"e/U+97":27}],11:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-require('./map/location.directive.js');
+require('./address/address.directive.js');
 require('./datetime/datetime.filter.js');
 require('./datetime/datetime.service.js');
 require('./user/user.model.js');
@@ -389,67 +492,12 @@ require('./user/userAPI.service.js');
 require('./authentication/authentication.service.js');
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\index.js","/features")
-},{"./authentication/authentication.service.js":5,"./datetime/datetime.filter.js":6,"./datetime/datetime.service.js":7,"./map/location.directive.js":9,"./user/user.model.js":10,"./user/user.service.js":11,"./user/userAPI.service.js":12,"buffer":22,"e/U+97":25}],9:[function(require,module,exports){
+},{"./address/address.directive.js":5,"./authentication/authentication.service.js":8,"./datetime/datetime.filter.js":9,"./datetime/datetime.service.js":10,"./user/user.model.js":12,"./user/user.service.js":13,"./user/userAPI.service.js":14,"buffer":24,"e/U+97":27}],12:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
+    require('../announcement/announcement.model');
 
-    var googlePlace = ['_', function (_) {
-        return {
-            restrict: 'A',
-            require: 'ngModel',
-            link: function (scope, element, attrs, model) {
-                var options = {
-                    types: [],
-                    componentRestrictions: {}
-                };
-
-                var REGION_TYPE = 'administrative_area_level_1';
-                var DEPARTMENT_TYPE = 'administrative_area_level_2';
-                var CITY_TYPE = 'locality';
-                var COUNTRY_TYPE = 'country';
-                var STREET_NUMBER_TYPE = 'street_number';
-                var STREET_TYPE = 'route';
-
-                scope.gPlace = new google.maps.places.Autocomplete(element[0], options);
-
-                google.maps.event.addListener(scope.gPlace, 'place_changed', function () {
-                    var addressComponents = scope.gPlace.getPlace().address_components;
-                    
-                    var address = {
-                        streetNumber: filterAddressComponent(addressComponents, STREET_NUMBER_TYPE),
-                        street: filterAddressComponent(addressComponents, STREET_TYPE),
-                        city: filterAddressComponent(addressComponents, CITY_TYPE),
-                        department: filterAddressComponent(addressComponents, DEPARTMENT_TYPE),
-                        region: filterAddressComponent(addressComponents, REGION_TYPE),
-                        country: filterAddressComponent(addressComponents, COUNTRY_TYPE)
-                    };
-
-                    scope.$apply(function () {
-                        model.$setViewValue(address);
-                    });
-                });
-
-                function filterAddressComponent(addressComponents, addressType) {
-                    var addressComponent = _.find(addressComponents, function (ac) {
-                        return ac.types.indexOf(addressType) !== -1;
-                    });
-
-                    if (addressComponent) {
-                        return addressComponent.long_name;
-                    }
-                }
-            }
-        };
-    }];
-
-    angular.module('driveMonitor').directive('googlePlace', googlePlace);
-})();
-}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\map\\location.directive.js","/features\\map")
-},{"buffer":22,"e/U+97":25}],10:[function(require,module,exports){
-(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-(function () {
-
-    angular.module('driveMonitor').factory('User', function () {
+    angular.module('driveMonitor').factory('User', ['Announcement', function (Announcement) {
         var defaultPhotoUrl = 'http://media.npr.org/assets/news/2009/10/27/facebook1_sq-17f6f5e06d5742d8c53576f7c13d5cf7158202a9.jpg?s=16';
 
         class User {
@@ -462,23 +510,23 @@ require('./authentication/authentication.service.js');
                 this.birth = birth;
                 this.imageUrl = (image && image.data) ? 'data:' + image.contentType + ';base64,' + image.data : defaultPhotoUrl;
                 this.isMonitor = isMonitor;
-                this.announcement = announcement;
+                this.announcement = announcement || new Announcement();
                 this.schedule = schedule;
             }
         }
 
         return User;
-    });
+    }]);
 
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\user\\user.model.js","/features\\user")
-},{"buffer":22,"e/U+97":25}],11:[function(require,module,exports){
+},{"../announcement/announcement.model":7,"buffer":24,"e/U+97":27}],13:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function(){
 
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\user\\user.service.js","/features\\user")
-},{"buffer":22,"e/U+97":25}],12:[function(require,module,exports){
+},{"buffer":24,"e/U+97":27}],14:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     var userAPIService = function ($http, $window, $q, _, Upload, User) {
@@ -556,7 +604,7 @@ require('./authentication/authentication.service.js');
     angular.module('driveMonitor').service('UserAPIService', userAPIService);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\user\\userAPI.service.js","/features\\user")
-},{"buffer":22,"e/U+97":25}],13:[function(require,module,exports){
+},{"buffer":24,"e/U+97":27}],15:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     var myApp = {
@@ -578,7 +626,7 @@ require('./authentication/authentication.service.js');
     angular.module('driveMonitor').component('myApp', myApp);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\app\\myApp.js","/modules\\app")
-},{"buffer":22,"e/U+97":25}],14:[function(require,module,exports){
+},{"buffer":24,"e/U+97":27}],16:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     "use strict";
@@ -601,7 +649,7 @@ require('./authentication/authentication.service.js');
     angular.module('driveMonitor').component('homePage', homePage);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\home\\home.js","/modules\\home")
-},{"buffer":22,"e/U+97":25}],15:[function(require,module,exports){
+},{"buffer":24,"e/U+97":27}],17:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 require('./app/myApp.js');
 require('./home/home.js');
@@ -612,7 +660,7 @@ require('./monitor/monitor.js');
 require('./lesson/lesson.js');
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\index.js","/modules")
-},{"./app/myApp.js":13,"./home/home.js":14,"./lesson/lesson.js":16,"./login/login.js":17,"./monitor/monitor.js":18,"./profile/profile.js":19,"./register/register.js":20,"buffer":22,"e/U+97":25}],16:[function(require,module,exports){
+},{"./app/myApp.js":15,"./home/home.js":16,"./lesson/lesson.js":18,"./login/login.js":19,"./monitor/monitor.js":20,"./profile/profile.js":21,"./register/register.js":22,"buffer":24,"e/U+97":27}],18:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     var lessonPage = {
@@ -622,13 +670,14 @@ require('./lesson/lesson.js');
         templateUrl: 'template/modules/lesson/lesson.html',
         controller: function ($scope, UserAPIService, DateTimeService) {
             var self = this;
-
+            
             self.onSubmit = function () {
                 updateUser();
             };
 
             function updateUser() {
                 self.user.isMonitor = true;
+                self.user.announcement.location = $scope.location; 
                 UserAPIService.update(self.user.id, _.pick(self.user, ['announcement', 'phone', 'isMonitor', 'schedule']));
             }
 
@@ -642,7 +691,7 @@ require('./lesson/lesson.js');
     angular.module('driveMonitor').component('lessonPage', lessonPage);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\lesson\\lesson.js","/modules\\lesson")
-},{"buffer":22,"e/U+97":25}],17:[function(require,module,exports){
+},{"buffer":24,"e/U+97":27}],19:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     "use strict";
@@ -682,7 +731,7 @@ require('./lesson/lesson.js');
     angular.module('driveMonitor').component('loginPage', loginPage);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\login\\login.js","/modules\\login")
-},{"buffer":22,"e/U+97":25}],18:[function(require,module,exports){
+},{"buffer":24,"e/U+97":27}],20:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     "use strict";
@@ -704,7 +753,7 @@ require('./lesson/lesson.js');
     angular.module('driveMonitor').component('monitorPage', monitorPage);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\monitor\\monitor.js","/modules\\monitor")
-},{"buffer":22,"e/U+97":25}],19:[function(require,module,exports){
+},{"buffer":24,"e/U+97":27}],21:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     "use strict";
@@ -746,7 +795,7 @@ require('./lesson/lesson.js');
     angular.module('driveMonitor').component('profilePage', profilePage);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\profile\\profile.js","/modules\\profile")
-},{"buffer":22,"e/U+97":25,"lodash":24}],20:[function(require,module,exports){
+},{"buffer":24,"e/U+97":27,"lodash":26}],22:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     "use strict";
@@ -787,7 +836,7 @@ require('./lesson/lesson.js');
     angular.module('driveMonitor').component('registerPage', registerPage);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\register\\register.js","/modules\\register")
-},{"buffer":22,"e/U+97":25}],21:[function(require,module,exports){
+},{"buffer":24,"e/U+97":27}],23:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -915,7 +964,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\base64-js\\lib\\b64.js","/..\\..\\node_modules\\base64-js\\lib")
-},{"buffer":22,"e/U+97":25}],22:[function(require,module,exports){
+},{"buffer":24,"e/U+97":27}],24:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!
  * The buffer module from node.js, for the browser.
@@ -2028,7 +2077,7 @@ function assert (test, message) {
 }
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\buffer\\index.js","/..\\..\\node_modules\\buffer")
-},{"base64-js":21,"buffer":22,"e/U+97":25,"ieee754":23}],23:[function(require,module,exports){
+},{"base64-js":23,"buffer":24,"e/U+97":27,"ieee754":25}],25:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
@@ -2116,7 +2165,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 }
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\ieee754\\index.js","/..\\..\\node_modules\\ieee754")
-},{"buffer":22,"e/U+97":25}],24:[function(require,module,exports){
+},{"buffer":24,"e/U+97":27}],26:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /**
  * @license
@@ -19185,7 +19234,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 }.call(this));
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\lodash\\lodash.js","/..\\..\\node_modules\\lodash")
-},{"buffer":22,"e/U+97":25}],25:[function(require,module,exports){
+},{"buffer":24,"e/U+97":27}],27:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 // shim for using process in browser
 
@@ -19252,4 +19301,4 @@ process.chdir = function (dir) {
 };
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\process\\browser.js","/..\\..\\node_modules\\process")
-},{"buffer":22,"e/U+97":25}]},{},[4])
+},{"buffer":24,"e/U+97":27}]},{},[4])

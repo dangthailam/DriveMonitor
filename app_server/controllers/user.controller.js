@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const User = mongoose.model('User');
+const Address = mongoose.model('Address');
 const _ = require('lodash');
 const fs = require('fs');
 
@@ -29,25 +30,51 @@ var findById = function (req, res) {
 };
 
 var update = function (req, res) {
-    User.findById(req.params.userId, function (err, user) {
+    User.findById(req.params.userId).populate('announcement.location').exec(function (err, user) {
         if (err) {
             res.status(400).json(err);
             return;
         }
 
-        for (var prop in req.body) {
-            user[prop] = req.body[prop];
-        }
-
-        user.save(function (err) {
-            if (err) {
-                res.status(400).json(err);
-                return;
+        if (_.has(req.body, 'announcement')) {
+            if (!user.announcement || !user.announcement.location) {
+                var address = new Address(req.body.announcement.location);
+                address.save(function (err) {
+                    user.announcement.location = address._id;
+                    saveUser(req, res, user);
+                });
+            } else {
+                Address.findById(user.announcement.location, function (err, addr) {
+                    for (var prop in req.body.announcement.location) {
+                        addr[prop] = req.body.announcement.location[prop];
+                    }
+                    addr.save(function (err) {
+                        saveUser(req, res, user);
+                    });
+                });
             }
-            res.status(200).json(user.export());
-        });
+        } else if (_.has(req.body, 'location')) {
+
+        } else {
+            saveUser(req, res, user);
+        }
     });
 };
+
+function saveUser(req, res, user) {
+    for (var prop in req.body) {
+        if (prop !== 'announcement' && prop !== 'location')
+            user[prop] = req.body[prop];
+    }
+
+    user.save(function (err) {
+        if (err) {
+            res.status(400).json(err);
+            return;
+        }
+        res.status(200).json(user.export());
+    });
+}
 
 var getMany = function (req, res) {
     if (req.query.country && req.query.pageNumber && req.query.quantityPerPage) {
