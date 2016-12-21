@@ -1,0 +1,19 @@
+<div class="container-fluid" id="lesson">
+    <div class="row">
+        <div class="col-lg-4 connection-form">
+            <div class="row" ng-repeat="user in $ctrl.result.searchResult.users">
+                <div class="col-lg-12">
+                    {{user.name}}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-xs-12">
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8 float-lg-right map-google-container">
+            <div class="map-google" google-map center-position="$ctrl.result.geocode"></div>
+        </div>
+    </div>
+</div>

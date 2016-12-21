@@ -5497,6 +5497,15 @@ nav img.user-avatar {
     background-color: white;
     border: 1px solid #ccc; }
 
+.map-google-container {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: auto;
+  top: 77px; }
+  .map-google-container .map-google {
+    height: 100%; }
+
 body {
   background-color: #f0f0f0;
   min-width: 768px; }

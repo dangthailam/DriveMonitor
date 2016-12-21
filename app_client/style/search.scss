@@ -1,9 +1,8 @@
-#form-container-background{
+#form-container-background {
     padding: 100px 40px 80px 40px;
     position: relative;
     overflow: hidden;
-
-    img{
+    img {
         position: absolute;
         left: 0;
         top: 0;
@@ -11,10 +10,20 @@
         height: auto;
         opacity: 0.5;
     }
-
-    .search-form{
+    .search-form {
         padding: 1rem 1rem 0 1rem;
         background-color: white;
         border: 1px solid #ccc;
+    }
+}
+
+.map-google-container {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: auto;
+    top: 77px;
+    .map-google {
+        height: 100%;
     }
 }

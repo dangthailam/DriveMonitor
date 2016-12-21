@@ -64,6 +64,28 @@ angular.module('driveMonitor')
             controller: function ($scope, loggedInUser, AuthenticationService) {
                 $scope.user = AuthenticationService.getCurrentUser();
             }
+        }).state('app.search', {
+            url: "/search?location",
+            template: '<search-page result="result"></search-page>',
+            controller: function ($scope, result) {
+                $scope.result = result;
+            },
+            resolve: {
+                result: ['$stateParams', 'AddressService', 'UserAPIService', function ($stateParams, AddressService, UserAPIService) {
+                    if (!$stateParams.location) return null;
+                    return AddressService.getGooglePlace($stateParams.location).then(function (location) {
+                        return UserAPIService.search(location, 10, 1).then(function (result) {
+                            return {
+                                searchResult: result.data,
+                                geocode: {
+                                    latitude: location.geoLatitude,
+                                    longtitude: location.geoLongtitude
+                                }
+                            };
+                        });
+                    });
+                }]
+            }
         });
     }).run(function ($rootScope, $state, AuthenticationService) {
         $rootScope.$on('$stateChangeStart', function (e, toState, toParams) {
@@ -75,7 +97,7 @@ angular.module('driveMonitor')
                 });
             }
         });
-    }).factory('_', function(){
+    }).factory('_', function () {
         return window._;
     });
 

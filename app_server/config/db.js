@@ -1,8 +1,8 @@
 var mongoose = require('mongoose');
+mongoose.Promise = global.Promise;
 
-
-// mongoose.connect("mongodb://dangthailam:Lamtp1989@ds119578.mlab.com:19578/moniteurdeconduite");
-mongoose.connect("mongodb://localhost/db_name");
+mongoose.connect("mongodb://dangthailam:Lamtp1989@ds119578.mlab.com:19578/moniteurdeconduite");
+// mongoose.connect("mongodb://localhost/db_name");
 
 
 // BRING IN YOUR SCHEMAS & MODELS

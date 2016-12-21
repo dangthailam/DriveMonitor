@@ -5,3 +5,4 @@ require('./register/register.js');
 require('./profile/profile.js');
 require('./monitor/monitor.js');
 require('./lesson/lesson.js');
+require('./search/search.js');

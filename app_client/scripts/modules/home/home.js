@@ -6,12 +6,12 @@
             users: '<'
         },
         templateUrl: "template/modules/home/home.html",
-        controller: ['$scope', 'UserAPIService', 'User', function ($scope, UserAPIService, User) {
+        controller: ['$scope', '$state', 'UserAPIService', 'AddressService', 'User', function ($scope, $state, UserAPIService, AddressService, User) {
             var self = this;
 
             self.onSubmit = function () {
-                UserAPIService.search(self.searchPlace, 10, 1).then(function (result) {
-                    console.log(result);
+                $state.transitionTo('app.search', {
+                    location: self.searchPlace
                 });
             };
         }]

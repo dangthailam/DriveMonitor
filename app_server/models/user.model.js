@@ -16,10 +16,6 @@
             type: String,
             required: true
         },
-        location: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Address'
-        },
         phone: String,
         birth: {
             day: Number,

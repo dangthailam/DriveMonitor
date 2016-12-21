@@ -22,7 +22,8 @@ app.use(expressWinston.logger({
       handleExceptions: true,
       humanReadableUnhandledException: true,
       colorize: true,
-      json: true
+      json: true,
+      level: 'error'
     })
   ]
 }));

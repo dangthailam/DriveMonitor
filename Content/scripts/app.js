@@ -4,7 +4,7 @@ require('./sidebar/sidebar.component.js');
 require('./schedule/schedule.component.js');
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components\\index.js","/components")
-},{"./schedule/schedule.component.js":2,"./sidebar/sidebar.component.js":3,"buffer":24,"e/U+97":27}],2:[function(require,module,exports){
+},{"./schedule/schedule.component.js":2,"./sidebar/sidebar.component.js":3,"buffer":27,"e/U+97":30}],2:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     var schedule = {
@@ -98,7 +98,7 @@ require('./schedule/schedule.component.js');
     angular.module('driveMonitor').component('schedule', schedule);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components\\schedule\\schedule.component.js","/components\\schedule")
-},{"buffer":24,"e/U+97":27}],3:[function(require,module,exports){
+},{"buffer":27,"e/U+97":30}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     "use strict";
@@ -122,7 +122,7 @@ require('./schedule/schedule.component.js');
     angular.module('driveMonitor').component('sideBar', sidebar);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components\\sidebar\\sidebar.component.js","/components\\sidebar")
-},{"buffer":24,"e/U+97":27}],4:[function(require,module,exports){
+},{"buffer":27,"e/U+97":30}],4:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var app = angular.module('driveMonitor', ['ui.router', 'ngFileUpload', 'ngImgCrop']);
 
@@ -190,6 +190,28 @@ angular.module('driveMonitor')
             controller: function ($scope, loggedInUser, AuthenticationService) {
                 $scope.user = AuthenticationService.getCurrentUser();
             }
+        }).state('app.search', {
+            url: "/search?location",
+            template: '<search-page result="result"></search-page>',
+            controller: function ($scope, result) {
+                $scope.result = result;
+            },
+            resolve: {
+                result: ['$stateParams', 'AddressService', 'UserAPIService', function ($stateParams, AddressService, UserAPIService) {
+                    if (!$stateParams.location) return null;
+                    return AddressService.getGooglePlace($stateParams.location).then(function (location) {
+                        return UserAPIService.search(location, 10, 1).then(function (result) {
+                            return {
+                                searchResult: result.data,
+                                geocode: {
+                                    latitude: location.geoLatitude,
+                                    longtitude: location.geoLongtitude
+                                }
+                            };
+                        });
+                    });
+                }]
+            }
         });
     }).run(function ($rootScope, $state, AuthenticationService) {
         $rootScope.$on('$stateChangeStart', function (e, toState, toParams) {
@@ -201,7 +223,7 @@ angular.module('driveMonitor')
                 });
             }
         });
-    }).factory('_', function(){
+    }).factory('_', function () {
         return window._;
     });
 
@@ -211,74 +233,13 @@ require('./modules/index.js');
 require('./features/index.js');
 
 angular.bootstrap(document, ['driveMonitor']);
-}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_39e3325.js","/")
-},{"./components/index.js":1,"./features/index.js":11,"./modules/index.js":17,"buffer":24,"e/U+97":27}],5:[function(require,module,exports){
-(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-(function () {
-
-    var googlePlace = ['Address', '_', function (Address, _) {
-        return {
-            restrict: 'A',
-            require: 'ngModel',
-            link: function (scope, element, attrs, model) {
-                var options = {
-                    types: [],
-                    componentRestrictions: {}
-                };
-                var REGION_TYPE = 'administrative_area_level_1';
-                var DEPARTMENT_TYPE = 'administrative_area_level_2';
-                var CITY_TYPE = 'locality';
-                var COUNTRY_TYPE = 'country';
-                var STREET_NUMBER_TYPE = 'street_number';
-                var STREET_TYPE = 'route';
-                var POSTAL_CODE_TYPE = 'postal_code';
-
-                scope.gPlace = new google.maps.places.Autocomplete(element[0], options);
-
-                google.maps.event.addListener(scope.gPlace, 'place_changed', function () {
-                    var place = scope.gPlace.getPlace();
-                    var addressComponents = place.address_components;
-                    var location = new Address(
-                        $(element).val(),
-                        filterAddressComponent(addressComponents, STREET_NUMBER_TYPE),
-                        filterAddressComponent(addressComponents, STREET_TYPE),
-                        filterAddressComponent(addressComponents, CITY_TYPE),
-                        filterAddressComponent(addressComponents, DEPARTMENT_TYPE),
-                        filterAddressComponent(addressComponents, REGION_TYPE),
-                        filterAddressComponent(addressComponents, COUNTRY_TYPE),
-                        filterAddressComponent(addressComponents, POSTAL_CODE_TYPE),
-                        place.geometry.location.lat(),
-                        place.geometry.location.lng()
-                    );
-
-                    scope.$apply(function () {
-                        scope.location = location;
-                        model.$setViewValue($(element).val());
-                    });
-                });
-
-                function filterAddressComponent(addressComponents, addressType) {
-                    var addressComponent = _.find(addressComponents, function (ac) {
-                        return ac.types.indexOf(addressType) !== -1;
-                    });
-
-                    if (addressComponent) {
-                        return addressComponent.long_name;
-                    }
-                }
-            }
-        };
-    }];
-
-    angular.module('driveMonitor').directive('googlePlace', googlePlace);
-})();
-}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\address\\address.directive.js","/features\\address")
-},{"buffer":24,"e/U+97":27}],6:[function(require,module,exports){
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_cfc1b0ed.js","/")
+},{"./components/index.js":1,"./features/index.js":13,"./modules/index.js":19,"buffer":27,"e/U+97":30}],5:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     angular.module('driveMonitor').factory('Address', [function () {
         class Address {
-            constructor(address, streetNumber, street, city, department, region, country, postalCode, geoLattitude, geoLongtitude) {
+            constructor(address, streetNumber, street, city, department, region, country, postalCode, geoLatitude, geoLongtitude) {
                 this.address = address;
                 this.streetNumber = streetNumber;
                 this.street = street;
@@ -287,7 +248,7 @@ angular.bootstrap(document, ['driveMonitor']);
                 this.region = region;
                 this.country = country;
                 this.postalCode = postalCode;
-                this.geoLattitude = geoLattitude;
+                this.geoLatitude = geoLatitude;
                 this.geoLongtitude = geoLongtitude;
             }
         }
@@ -296,7 +257,130 @@ angular.bootstrap(document, ['driveMonitor']);
     }]);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\address\\address.model.js","/features\\address")
-},{"buffer":24,"e/U+97":27}],7:[function(require,module,exports){
+},{"buffer":27,"e/U+97":30}],6:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+(function () {
+    var addressService = ['$http', 'Address', function ($http, Address) {
+        var REGION_TYPE = 'administrative_area_level_1';
+        var DEPARTMENT_TYPE = 'administrative_area_level_2';
+        var CITY_TYPE = 'locality';
+        var COUNTRY_TYPE = 'country';
+        var STREET_NUMBER_TYPE = 'street_number';
+        var STREET_TYPE = 'route';
+        var POSTAL_CODE_TYPE = 'postal_code';
+        var geocodeUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
+        var apiKey = 'AIzaSyBpFU-iuhll0xMKkRs02WAlM8CdWWfsbo0';
+
+        function filterAddressComponent(addressComponents, addressType) {
+            var addressComponent = _.find(addressComponents, function (ac) {
+                return ac.types.indexOf(addressType) !== -1;
+            });
+
+            if (addressComponent) {
+                return addressComponent.long_name;
+            }
+        }
+
+        var getGooglePlace = function (address) {
+            return $http({
+                url: geocodeUrl,
+                method: "GET",
+                params: {
+                    key: apiKey,
+                    address: address
+                }
+            }).then(function (result) {
+                if (result.data.status === "OK") {
+                    var place = result.data.results[0];
+                    var addressComponents = place.address_components;
+                    return new Address(
+                        address,
+                        filterAddressComponent(addressComponents, STREET_NUMBER_TYPE),
+                        filterAddressComponent(addressComponents, STREET_TYPE),
+                        filterAddressComponent(addressComponents, CITY_TYPE),
+                        filterAddressComponent(addressComponents, DEPARTMENT_TYPE),
+                        filterAddressComponent(addressComponents, REGION_TYPE),
+                        filterAddressComponent(addressComponents, COUNTRY_TYPE),
+                        filterAddressComponent(addressComponents, POSTAL_CODE_TYPE),
+                        place.geometry.location.lat,
+                        place.geometry.location.lng
+                    );
+                }
+                return new Address(address);
+            });
+        };
+
+        return {
+            getGooglePlace: getGooglePlace
+        };
+    }];
+
+    angular.module('driveMonitor').service('AddressService', addressService);
+})();
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\address\\address.service.js","/features\\address")
+},{"buffer":27,"e/U+97":30}],7:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+(function () {
+
+    var googleMap = ['Address', '_', 'AddressService', function (Address, _, AddressService) {
+        return {
+            scope: {
+                centerPosition: '<'
+            },
+            restrict: 'A',
+            link: function (scope, element, attrs) {
+                var options = {
+                    center: {
+                        lat: scope.centerPosition.latitude,
+                        lng: scope.centerPosition.longtitude
+                    },
+                    zoom: 10
+                };
+
+                var map = new google.maps.Map(element[0], options);
+
+                // if (navigator.geolocation) {
+                //     navigator.geolocation.getCurrentPosition(function (position) {
+                //         initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                //         map.setCenter(initialLocation);
+                //     });
+                // }
+            }
+        };
+    }];
+
+    angular.module('driveMonitor').directive('googleMap', googleMap);
+})();
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\address\\googleMap.directive.js","/features\\address")
+},{"buffer":27,"e/U+97":30}],8:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+(function () {
+
+    var googlePlace = ['Address', '_', 'AddressService', function (Address, _, AddressService) {
+        return {
+            restrict: 'A',
+            require: 'ngModel',
+            link: function (scope, element, attrs, model) {
+                var options = {
+                    types: [],
+                    componentRestrictions: {}
+                };
+                
+                var gPlace = new google.maps.places.Autocomplete(element[0], options);
+
+                google.maps.event.addListener(gPlace, 'place_changed', function () {
+                    scope.$apply(function () {
+                        model.$setViewValue($(element).val());
+                    });
+                });
+            }
+        };
+    }];
+
+    angular.module('driveMonitor').directive('googlePlace', googlePlace);
+})();
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\address\\googlePlace.directive.js","/features\\address")
+},{"buffer":27,"e/U+97":30}],9:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     require('../address/address.model');
@@ -315,7 +399,7 @@ angular.bootstrap(document, ['driveMonitor']);
     }]);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\announcement\\announcement.model.js","/features\\announcement")
-},{"../address/address.model":6,"buffer":24,"e/U+97":27}],8:[function(require,module,exports){
+},{"../address/address.model":5,"buffer":27,"e/U+97":30}],10:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     var authenticationService = function ($http, $window, UserAPIService, User) {
@@ -386,7 +470,7 @@ angular.bootstrap(document, ['driveMonitor']);
 
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\authentication\\authentication.service.js","/features\\authentication")
-},{"buffer":24,"e/U+97":27}],9:[function(require,module,exports){
+},{"buffer":27,"e/U+97":30}],11:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     var displayHour = function () {
@@ -398,7 +482,7 @@ angular.bootstrap(document, ['driveMonitor']);
     angular.module('driveMonitor').filter('displayHour', displayHour);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\datetime\\datetime.filter.js","/features\\datetime")
-},{"buffer":24,"e/U+97":27}],10:[function(require,module,exports){
+},{"buffer":27,"e/U+97":30}],12:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     var dateTimeService = function () {
@@ -481,9 +565,11 @@ angular.bootstrap(document, ['driveMonitor']);
     angular.module('driveMonitor').service('DateTimeService', dateTimeService);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\datetime\\datetime.service.js","/features\\datetime")
-},{"buffer":24,"e/U+97":27}],11:[function(require,module,exports){
+},{"buffer":27,"e/U+97":30}],13:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-require('./address/address.directive.js');
+require('./address/address.service.js');
+require('./address/googleMap.directive');
+require('./address/googlePlace.directive');
 require('./datetime/datetime.filter.js');
 require('./datetime/datetime.service.js');
 require('./user/user.model.js');
@@ -492,7 +578,7 @@ require('./user/userAPI.service.js');
 require('./authentication/authentication.service.js');
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\index.js","/features")
-},{"./address/address.directive.js":5,"./authentication/authentication.service.js":8,"./datetime/datetime.filter.js":9,"./datetime/datetime.service.js":10,"./user/user.model.js":12,"./user/user.service.js":13,"./user/userAPI.service.js":14,"buffer":24,"e/U+97":27}],12:[function(require,module,exports){
+},{"./address/address.service.js":6,"./address/googleMap.directive":7,"./address/googlePlace.directive":8,"./authentication/authentication.service.js":10,"./datetime/datetime.filter.js":11,"./datetime/datetime.service.js":12,"./user/user.model.js":14,"./user/user.service.js":15,"./user/userAPI.service.js":16,"buffer":27,"e/U+97":30}],14:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     require('../announcement/announcement.model');
@@ -520,13 +606,13 @@ require('./authentication/authentication.service.js');
 
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\user\\user.model.js","/features\\user")
-},{"../announcement/announcement.model":7,"buffer":24,"e/U+97":27}],13:[function(require,module,exports){
+},{"../announcement/announcement.model":9,"buffer":27,"e/U+97":30}],15:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function(){
 
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\user\\user.service.js","/features\\user")
-},{"buffer":24,"e/U+97":27}],14:[function(require,module,exports){
+},{"buffer":27,"e/U+97":30}],16:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     var userAPIService = function ($http, $window, $q, _, Upload, User) {
@@ -604,7 +690,7 @@ require('./authentication/authentication.service.js');
     angular.module('driveMonitor').service('UserAPIService', userAPIService);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/features\\user\\userAPI.service.js","/features\\user")
-},{"buffer":24,"e/U+97":27}],15:[function(require,module,exports){
+},{"buffer":27,"e/U+97":30}],17:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     var myApp = {
@@ -626,7 +712,7 @@ require('./authentication/authentication.service.js');
     angular.module('driveMonitor').component('myApp', myApp);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\app\\myApp.js","/modules\\app")
-},{"buffer":24,"e/U+97":27}],16:[function(require,module,exports){
+},{"buffer":27,"e/U+97":30}],18:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     "use strict";
@@ -636,12 +722,12 @@ require('./authentication/authentication.service.js');
             users: '<'
         },
         templateUrl: "template/modules/home/home.html",
-        controller: ['$scope', 'UserAPIService', 'User', function ($scope, UserAPIService, User) {
+        controller: ['$scope', '$state', 'UserAPIService', 'AddressService', 'User', function ($scope, $state, UserAPIService, AddressService, User) {
             var self = this;
 
             self.onSubmit = function () {
-                UserAPIService.search(self.searchPlace, 10, 1).then(function (result) {
-                    console.log(result);
+                $state.transitionTo('app.search', {
+                    location: self.searchPlace
                 });
             };
         }]
@@ -649,7 +735,7 @@ require('./authentication/authentication.service.js');
     angular.module('driveMonitor').component('homePage', homePage);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\home\\home.js","/modules\\home")
-},{"buffer":24,"e/U+97":27}],17:[function(require,module,exports){
+},{"buffer":27,"e/U+97":30}],19:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 require('./app/myApp.js');
 require('./home/home.js');
@@ -658,9 +744,10 @@ require('./register/register.js');
 require('./profile/profile.js');
 require('./monitor/monitor.js');
 require('./lesson/lesson.js');
+require('./search/search.js');
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\index.js","/modules")
-},{"./app/myApp.js":15,"./home/home.js":16,"./lesson/lesson.js":18,"./login/login.js":19,"./monitor/monitor.js":20,"./profile/profile.js":21,"./register/register.js":22,"buffer":24,"e/U+97":27}],18:[function(require,module,exports){
+},{"./app/myApp.js":17,"./home/home.js":18,"./lesson/lesson.js":20,"./login/login.js":21,"./monitor/monitor.js":22,"./profile/profile.js":23,"./register/register.js":24,"./search/search.js":25,"buffer":27,"e/U+97":30}],20:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     var lessonPage = {
@@ -668,21 +755,33 @@ require('./lesson/lesson.js');
             user: '<'
         },
         templateUrl: 'template/modules/lesson/lesson.html',
-        controller: function ($scope, UserAPIService, DateTimeService) {
+        controller: function ($scope, UserAPIService, DateTimeService, AddressService) {
             var self = this;
-            
+            var addressChanged = false;
+
             self.onSubmit = function () {
                 updateUser();
             };
 
+            self.addressChanged = function () {
+                addressChanged = true;
+            };
+
             function updateUser() {
                 self.user.isMonitor = true;
-                self.user.announcement.location = $scope.location; 
-                UserAPIService.update(self.user.id, _.pick(self.user, ['announcement', 'phone', 'isMonitor', 'schedule']));
+
+                if (addressChanged) {
+                    AddressService.getGooglePlace(self.user.announcement.location.address).then(function (location) {
+                        self.user.announcement.location = location;
+                        UserAPIService.update(self.user.id, _.pick(self.user, ['announcement', 'phone', 'isMonitor', 'schedule']));
+                    });
+                } else {
+                    UserAPIService.update(self.user.id, _.pick(self.user, ['announcement', 'phone', 'isMonitor', 'schedule']));
+                }
             }
 
             self.$onInit = function () {
-                if(!self.user.schedule || !self.user.schedule.length)
+                if (!self.user.schedule || !self.user.schedule.length)
                     self.user.schedule = DateTimeService.generateNewSchedule();
             };
         }
@@ -691,7 +790,7 @@ require('./lesson/lesson.js');
     angular.module('driveMonitor').component('lessonPage', lessonPage);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\lesson\\lesson.js","/modules\\lesson")
-},{"buffer":24,"e/U+97":27}],19:[function(require,module,exports){
+},{"buffer":27,"e/U+97":30}],21:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     "use strict";
@@ -731,7 +830,7 @@ require('./lesson/lesson.js');
     angular.module('driveMonitor').component('loginPage', loginPage);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\login\\login.js","/modules\\login")
-},{"buffer":24,"e/U+97":27}],20:[function(require,module,exports){
+},{"buffer":27,"e/U+97":30}],22:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     "use strict";
@@ -753,7 +852,7 @@ require('./lesson/lesson.js');
     angular.module('driveMonitor').component('monitorPage', monitorPage);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\monitor\\monitor.js","/modules\\monitor")
-},{"buffer":24,"e/U+97":27}],21:[function(require,module,exports){
+},{"buffer":27,"e/U+97":30}],23:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     "use strict";
@@ -795,7 +894,7 @@ require('./lesson/lesson.js');
     angular.module('driveMonitor').component('profilePage', profilePage);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\profile\\profile.js","/modules\\profile")
-},{"buffer":24,"e/U+97":27,"lodash":26}],22:[function(require,module,exports){
+},{"buffer":27,"e/U+97":30,"lodash":29}],24:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
     "use strict";
@@ -836,7 +935,27 @@ require('./lesson/lesson.js');
     angular.module('driveMonitor').component('registerPage', registerPage);
 })();
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\register\\register.js","/modules\\register")
-},{"buffer":24,"e/U+97":27}],23:[function(require,module,exports){
+},{"buffer":27,"e/U+97":30}],25:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+(function () {
+    var searchPage = {
+        bindings: {
+            result: '<'
+        },
+        templateUrl: 'template/modules/search/search.html',
+        controller: function(){
+            var self = this;
+
+            
+
+            console.log(self.result);
+        }
+    };
+
+    angular.module('driveMonitor').component('searchPage', searchPage);
+})();
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/modules\\search\\search.js","/modules\\search")
+},{"buffer":27,"e/U+97":30}],26:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -964,7 +1083,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\base64-js\\lib\\b64.js","/..\\..\\node_modules\\base64-js\\lib")
-},{"buffer":24,"e/U+97":27}],24:[function(require,module,exports){
+},{"buffer":27,"e/U+97":30}],27:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!
  * The buffer module from node.js, for the browser.
@@ -2077,7 +2196,7 @@ function assert (test, message) {
 }
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\buffer\\index.js","/..\\..\\node_modules\\buffer")
-},{"base64-js":23,"buffer":24,"e/U+97":27,"ieee754":25}],25:[function(require,module,exports){
+},{"base64-js":26,"buffer":27,"e/U+97":30,"ieee754":28}],28:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
@@ -2165,7 +2284,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 }
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\ieee754\\index.js","/..\\..\\node_modules\\ieee754")
-},{"buffer":24,"e/U+97":27}],26:[function(require,module,exports){
+},{"buffer":27,"e/U+97":30}],29:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /**
  * @license
@@ -19234,7 +19353,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 }.call(this));
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\lodash\\lodash.js","/..\\..\\node_modules\\lodash")
-},{"buffer":24,"e/U+97":27}],27:[function(require,module,exports){
+},{"buffer":27,"e/U+97":30}],30:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 // shim for using process in browser
 
@@ -19301,4 +19420,4 @@ process.chdir = function (dir) {
 };
 
 }).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/..\\..\\node_modules\\process\\browser.js","/..\\..\\node_modules\\process")
-},{"buffer":24,"e/U+97":27}]},{},[4])
+},{"buffer":27,"e/U+97":30}]},{},[4])

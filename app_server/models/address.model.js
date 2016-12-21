@@ -10,8 +10,8 @@
         region: String,
         country: String,
         postalCode: String,
-        geoLattitude: Number,
-        geoLongtitute: Number
+        geoLatitude: Number,
+        geoLongtitude: Number
     });
 
     mongoose.model('Address', addressSchema);

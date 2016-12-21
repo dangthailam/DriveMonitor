@@ -1,7 +1,7 @@
 (function () {
     angular.module('driveMonitor').factory('Address', [function () {
         class Address {
-            constructor(address, streetNumber, street, city, department, region, country, postalCode, geoLattitude, geoLongtitude) {
+            constructor(address, streetNumber, street, city, department, region, country, postalCode, geoLatitude, geoLongtitude) {
                 this.address = address;
                 this.streetNumber = streetNumber;
                 this.street = street;
@@ -10,7 +10,7 @@
                 this.region = region;
                 this.country = country;
                 this.postalCode = postalCode;
-                this.geoLattitude = geoLattitude;
+                this.geoLatitude = geoLatitude;
                 this.geoLongtitude = geoLongtitude;
             }
         }

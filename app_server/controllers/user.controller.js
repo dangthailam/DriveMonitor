@@ -3,6 +3,7 @@ const User = mongoose.model('User');
 const Address = mongoose.model('Address');
 const _ = require('lodash');
 const fs = require('fs');
+const Promise = require('bluebird');
 
 var create = function (req, res) {
     var user = new User();
@@ -20,7 +21,7 @@ var create = function (req, res) {
 };
 
 var findById = function (req, res) {
-    User.findById(req.params.userId, function (err, user) {
+    User.findById(req.params.userId).populate('announcement.location').exec(function (err, user) {
         if (err) {
             res.status(400).json(err);
             return;
@@ -30,7 +31,7 @@ var findById = function (req, res) {
 };
 
 var update = function (req, res) {
-    User.findById(req.params.userId).populate('announcement.location').exec(function (err, user) {
+    User.findById(req.params.userId, function (err, user) {
         if (err) {
             res.status(400).json(err);
             return;
@@ -53,8 +54,6 @@ var update = function (req, res) {
                     });
                 });
             }
-        } else if (_.has(req.body, 'location')) {
-
         } else {
             saveUser(req, res, user);
         }
@@ -63,7 +62,7 @@ var update = function (req, res) {
 
 function saveUser(req, res, user) {
     for (var prop in req.body) {
-        if (prop !== 'announcement' && prop !== 'location')
+        if (prop !== 'announcement')
             user[prop] = req.body[prop];
     }
 
@@ -78,30 +77,112 @@ function saveUser(req, res, user) {
 
 var getMany = function (req, res) {
     if (req.query.country && req.query.pageNumber && req.query.quantityPerPage) {
-        var streetNumber = req.query.country;
-        var street = req.query.country;
-        var city = req.query.country;
-        var region = req.query.country;
-        var department = req.query.country;
+        var streetNumber = req.query.streetNumber;
+        var street = req.query.street;
+        var city = req.query.city;
+        var region = req.query.region;
+        var department = req.query.department;
         var country = req.query.country;
-        var pageNumber = req.query.country;
-        var quantityPerPage = req.query.country;
-
-        res.status(200).json(req.query);
+        var pageNumber = req.query.pageNumber;
+        var quantityPerPage = req.query.quantityPerPage;
+        var geoLatitude = req.query.geoLatitude;
+        var geoLongtitude = req.query.geoLongtitude;
+        searchUsers(res, pageNumber, quantityPerPage, geoLatitude, geoLongtitude, country, region, department, city, street);
     } else {
         var quantity = req.query.quantity ? parseInt(req.query.quantity) : null;
         var isMonitor = req.query.isMonitor;
-        getUsers(req, res, quantity, isMonitor);
+        getUsers(res, quantity, isMonitor);
     }
 };
 
-function getUsers(req, res, quantity, isMonitor) {
+function searchUsers(res, pageNumber, quantityPerPage, geoLatitude, geoLongtitude, country, region, department, city, street) {
+    var queryClue;
+    var total;
+
+    var params = {};
+    if (country) {
+        params.country = country;
+        queryClue = "country";
+    }
+    if (region) {
+        params.region = region;
+        queryClue = "region";
+    }
+    if (department) {
+        params.department = department;
+        queryClue = "department";
+    }
+    if (city) {
+        params.city = city;
+        queryClue = "city";
+    }
+    if (street) {
+        params.street = street;
+        queryClue = "street";
+    }
+
+    Address.find(params).count(function (err, count) {
+        if (count) {
+            Address.find(params).skip((pageNumber - 1) * quantityPerPage).limit(parseInt(quantityPerPage)).exec(function (err, addresses) {
+                findUserByAddress(res, addresses, count);
+            });
+        } else {
+            suggestUsers(res, params, queryClue);
+        }
+    });
+}
+
+function suggestUsers(res, query, queryClue) {
+    var params = {};
+    var clues = ["country", "region", "department", "city"]; //no street
+
+    var idx = _.findIndex(clues, function (c) {
+        return c === queryClue;
+    });
+
+    for (var i = 0; i < idx; i++) {
+        params[clues[i]] = query[clues[i]];
+    }
+
+    Address.find(params).limit(5).exec(function (err, addresses) {
+        if (addresses && addresses.length) {
+            findUserByAddress(res, addresses, 0);
+        } else {
+            idx = idx - 1;
+            if (idx >= 0) {
+                queryClue = clues[idx];
+                suggestUsers(res, query, queryClue);
+            }
+        }
+    });
+}
+
+function findUserByAddress(res, addresses, count) {
+    User.find({
+        'announcement.location': {
+            $in: _.map(addresses, function (addr) {
+                return addr._id;
+            })
+        }
+    }, function (err, users) {
+        var returnUsers = _.map(users, function (u) {
+            return u.export();
+        });
+        res.status(200).json({
+            users: returnUsers,
+            total: count,
+            found: count > 0 ? true : false
+        });
+    });
+}
+
+function getUsers(res, quantity, isMonitor) {
     if (isMonitor === null || isMonitor === undefined) {
-        users = User.find({});
+        users = User.find({}).populate('announcement.location');
     } else {
         users = User.find({
             'isMonitor': isMonitor
-        });
+        }).populate('announcement.location');
     }
     if (quantity) {
         users = users.limit(quantity);
