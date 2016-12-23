@@ -34,5 +34,5 @@ module.exports = function(router) {
 
     router.get('/loginFailure', function(req, res) {
         res.status(400).json(req.flash('errors'));
-    })
+    });
 };

@@ -9,7 +9,7 @@ passport.use(new LocalStrategy({
     function(username, password, done) {
         User.findOne({
             email: username
-        }, function(err, user) {
+        }).populate('authentication').exec(function(err, user) {
             if (err) {
                 return done(err);
             }
@@ -20,7 +20,7 @@ passport.use(new LocalStrategy({
                 });
             }
             // Return if password is wrong
-            if (!user.validPassword(password)) {
+            if (!user.authentication.validPassword(password)) {
                 return done(null, false, {
                     message: 'Password is wrong'
                 });

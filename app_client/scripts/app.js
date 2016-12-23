@@ -14,7 +14,7 @@ angular.module('driveMonitor')
             resolve: {
                 loggedInUser: function (AuthenticationService, UserAPIService) {
                     if (AuthenticationService.isLoggedIn()) {
-                        return UserAPIService.getUser(AuthenticationService.getCurrentUser().id).then(function (user) {
+                        return UserAPIService.getUser(AuthenticationService.getCurrentUser().id, true).then(function (user) {
                             AuthenticationService.setCurrentUser(user);
                             return user;
                         });
@@ -24,15 +24,7 @@ angular.module('driveMonitor')
             }
         }).state('app.home', {
             url: "/",
-            template: "<home-page users='users'></home-page>",
-            controller: function ($scope, users) {
-                $scope.users = users;
-            },
-            resolve: {
-                users: function (UserAPIService) {
-                    return UserAPIService.getUsers(3, true);
-                }
-            }
+            template: "<home-page></home-page>"
         }).state('app.login', {
             url: "/login?return",
             template: "<login-page></login-page>"
@@ -74,13 +66,14 @@ angular.module('driveMonitor')
                 result: ['$stateParams', 'AddressService', 'UserAPIService', function ($stateParams, AddressService, UserAPIService) {
                     if (!$stateParams.location) return null;
                     return AddressService.getGooglePlace($stateParams.location).then(function (location) {
-                        return UserAPIService.search(location, 10, 1).then(function (result) {
+                        return UserAPIService.search(location.address, 10, 1).then(function (result) {
                             return {
                                 searchResult: result.data,
                                 geocode: {
-                                    latitude: location.geoLatitude,
-                                    longtitude: location.geoLongtitude
-                                }
+                                    latitude: location.address.geoLatitude,
+                                    longtitude: location.address.geoLongtitude
+                                },
+                                viewport: location.viewport
                             };
                         });
                     });

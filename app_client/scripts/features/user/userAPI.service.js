@@ -4,28 +4,33 @@
             return $http.patch('/users/' + userId, user);
         };
 
-        var getUsers = function (quantity, isMonitor) {
+        var getUsers = function (quantity, role) {
             return $http({
                 url: '/users',
                 method: "GET",
                 params: {
                     quantity: quantity,
-                    isMonitor: isMonitor
+                    role: role
                 }
             }).then(function (result) {
                 return _.map(result.data, function (u) {
-                    return new User(u._id, u.email, u.name, u.location, u.phone, u.birth, u.image, u.isMonitor, u.announcement, u.schedule);
+                    return new User(u._id, u.email, u.name, u.roles, u.announcement, u.schedule, u.authentication);
                 });
             });
         };
 
-        var getUser = function (userId) {
+        var getUser = function (userId, authenticationIncluded) {
             return $http({
                 url: '/users/' + userId,
-                method: "GET"
+                method: "GET",
+                params: {
+                    authenticationIncluded: authenticationIncluded
+                }
             }).then(function (result) {
                 var u = result.data;
-                return new User(u._id, u.email, u.name, u.location, u.phone, u.birth, u.image, u.isMonitor, u.announcement, u.schedule);
+                var user = new User(u._id, u.email, u.name, u.roles, u.announcement, u.schedule, u.authentication);
+                console.log(user, u);
+                return user;
             });
         };
 
@@ -54,9 +59,6 @@
                 params: query
             }).then(function (result) {
                 return result;
-                // return _.map(result.data, function (u) {
-                //     return new User(u._id, u.email, u.name, u.location, u.phone, u.birth, u.image, u.isMonitor, u.announcement, u.schedule);
-                // });
             });
         };
 

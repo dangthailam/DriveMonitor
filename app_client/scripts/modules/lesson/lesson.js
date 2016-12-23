@@ -7,7 +7,7 @@
         controller: function ($scope, UserAPIService, DateTimeService, AddressService) {
             var self = this;
             var addressChanged = false;
-
+            console.log(self.user);
             self.onSubmit = function () {
                 updateUser();
             };
@@ -17,15 +17,17 @@
             };
 
             function updateUser() {
-                self.user.isMonitor = true;
+                if (self.user.roles.indexOf('Monitor') === -1) {
+                    self.user.roles.push('Monitor');
+                }
 
                 if (addressChanged) {
                     AddressService.getGooglePlace(self.user.announcement.location.address).then(function (location) {
-                        self.user.announcement.location = location;
-                        UserAPIService.update(self.user.id, _.pick(self.user, ['announcement', 'phone', 'isMonitor', 'schedule']));
+                        self.user.announcement.location = location.address;
+                        UserAPIService.update(self.user.id, _.pick(self.user, ['announcement', 'phone', 'roles', 'schedule']));
                     });
                 } else {
-                    UserAPIService.update(self.user.id, _.pick(self.user, ['announcement', 'phone', 'isMonitor', 'schedule']));
+                    UserAPIService.update(self.user.id, _.pick(self.user, ['announcement', 'phone', 'roles', 'schedule']));
                 }
             }
 

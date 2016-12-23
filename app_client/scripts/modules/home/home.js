@@ -2,9 +2,6 @@
     "use strict";
 
     var homePage = {
-        bindings: {
-            users: '<'
-        },
         templateUrl: "template/modules/home/home.html",
         controller: ['$scope', '$state', 'UserAPIService', 'AddressService', 'User', function ($scope, $state, UserAPIService, AddressService, User) {
             var self = this;

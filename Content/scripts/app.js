@@ -140,7 +140,7 @@ angular.module('driveMonitor')
             resolve: {
                 loggedInUser: function (AuthenticationService, UserAPIService) {
                     if (AuthenticationService.isLoggedIn()) {
-                        return UserAPIService.getUser(AuthenticationService.getCurrentUser().id).then(function (user) {
+                        return UserAPIService.getUser(AuthenticationService.getCurrentUser().id, true).then(function (user) {
                             AuthenticationService.setCurrentUser(user);
                             return user;
                         });
@@ -150,15 +150,7 @@ angular.module('driveMonitor')
             }
         }).state('app.home', {
             url: "/",
-            template: "<home-page users='users'></home-page>",
-            controller: function ($scope, users) {
-                $scope.users = users;
-            },
-            resolve: {
-                users: function (UserAPIService) {
-                    return UserAPIService.getUsers(3, true);
-                }
-            }
+            template: "<home-page></home-page>"
         }).state('app.login', {
             url: "/login?return",
             template: "<login-page></login-page>"
@@ -200,13 +192,14 @@ angular.module('driveMonitor')
                 result: ['$stateParams', 'AddressService', 'UserAPIService', function ($stateParams, AddressService, UserAPIService) {
                     if (!$stateParams.location) return null;
                     return AddressService.getGooglePlace($stateParams.location).then(function (location) {
-                        return UserAPIService.search(location, 10, 1).then(function (result) {
+                        return UserAPIService.search(location.address, 10, 1).then(function (result) {
                             return {
                                 searchResult: result.data,
                                 geocode: {
-                                    latitude: location.geoLatitude,
-                                    longtitude: location.geoLongtitude
-                                }
+                                    latitude: location.address.geoLatitude,
+                                    longtitude: location.address.geoLongtitude
+                                },
+                                viewport: location.viewport
                             };
                         });
                     });
@@ -233,7 +226,7 @@ require('./modules/index.js');
 require('./features/index.js');
 
 angular.bootstrap(document, ['driveMonitor']);
-}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_cfc1b0ed.js","/")
+}).call(this,require("e/U+97"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_7892a244.js","/")
 },{"./components/index.js":1,"./features/index.js":13,"./modules/index.js":19,"buffer":27,"e/U+97":30}],5:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function () {
@@ -293,7 +286,7 @@ angular.bootstrap(document, ['driveMonitor']);
                 if (result.data.status === "OK") {
                     var place = result.data.results[0];
                     var addressComponents = place.address_components;
-                    return new Address(
+                    var returnAddress = new Address(
                         address,
                         filterAddressComponent(addressComponents, STREET_NUMBER_TYPE),
                         filterAddressComponent(addressComponents, STREET_TYPE),
@@ -305,8 +298,16 @@ angular.bootstrap(document, ['driveMonitor']);
                         place.geometry.location.lat,
                         place.geometry.location.lng
                     );
+
+                    return {
+                        address: returnAddress,
+                        viewport: place.geometry.viewport
+                    };
                 }
-                return new Address(address);
+                return {
+                    address: new Address(address),
+                    viewport: null
+                };
             });
         };
 
@@ -325,7 +326,9 @@ angular.bootstrap(document, ['driveMonitor']);
     var googleMap = ['Address', '_', 'AddressService', function (Address, _, AddressService) {
         return {
             scope: {
-                centerPosition: '<'
+                centerPosition: '<',
+                viewport: '<',
+                users: '<'
             },
             restrict: 'A',
             link: function (scope, element, attrs) {
@@ -336,15 +339,10 @@ angular.bootstrap(document, ['driveMonitor']);
                     },
                     zoom: 10
                 };
-
+                console.log(scope.users);
                 var map = new google.maps.Map(element[0], options);
-
-                // if (navigator.geolocation) {
-                //     navigator.geolocation.getCurrentPosition(function (position) {
-                //         initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-                //         map.setCenter(initialLocation);
-                //     });
-                // }
+                var bound = new google.maps.LatLngBounds(scope.viewport.southwest, scope.viewport.northeast);
+                map.fitBounds(bound);
             }
         };
     }];
@@ -587,17 +585,19 @@ require('./authentication/authentication.service.js');
         var defaultPhotoUrl = 'http://media.npr.org/assets/news/2009/10/27/facebook1_sq-17f6f5e06d5742d8c53576f7c13d5cf7158202a9.jpg?s=16';
 
         class User {
-            constructor(id, email, name, location, phone, birth, image, isMonitor, announcement, schedule) {
+            constructor(id, email, name, roles, announcement, schedule, authentication) {
                 this.id = id;
                 this.email = email;
                 this.name = name;
-                this.location = location;
-                this.phone = phone;
-                this.birth = birth;
-                this.imageUrl = (image && image.data) ? 'data:' + image.contentType + ';base64,' + image.data : defaultPhotoUrl;
-                this.isMonitor = isMonitor;
-                this.announcement = announcement || new Announcement();
+                this.roles = roles || [];
                 this.schedule = schedule;
+                this.announcement = announcement || new Announcement();
+
+                if (authentication) {
+                    this.phone = authentication.phone;
+                    this.birth = authentication.birth;
+                    this.imageUrl = (authentication.image && authentication.image.data) ? 'data:' + authentication.image.contentType + ';base64,' + authentication.image.data : defaultPhotoUrl;
+                }
             }
         }
 
@@ -620,28 +620,33 @@ require('./authentication/authentication.service.js');
             return $http.patch('/users/' + userId, user);
         };
 
-        var getUsers = function (quantity, isMonitor) {
+        var getUsers = function (quantity, role) {
             return $http({
                 url: '/users',
                 method: "GET",
                 params: {
                     quantity: quantity,
-                    isMonitor: isMonitor
+                    role: role
                 }
             }).then(function (result) {
                 return _.map(result.data, function (u) {
-                    return new User(u._id, u.email, u.name, u.location, u.phone, u.birth, u.image, u.isMonitor, u.announcement, u.schedule);
+                    return new User(u._id, u.email, u.name, u.roles, u.announcement, u.schedule, u.authentication);
                 });
             });
         };
 
-        var getUser = function (userId) {
+        var getUser = function (userId, authenticationIncluded) {
             return $http({
                 url: '/users/' + userId,
-                method: "GET"
+                method: "GET",
+                params: {
+                    authenticationIncluded: authenticationIncluded
+                }
             }).then(function (result) {
                 var u = result.data;
-                return new User(u._id, u.email, u.name, u.location, u.phone, u.birth, u.image, u.isMonitor, u.announcement, u.schedule);
+                var user = new User(u._id, u.email, u.name, u.roles, u.announcement, u.schedule, u.authentication);
+                console.log(user, u);
+                return user;
             });
         };
 
@@ -670,9 +675,6 @@ require('./authentication/authentication.service.js');
                 params: query
             }).then(function (result) {
                 return result;
-                // return _.map(result.data, function (u) {
-                //     return new User(u._id, u.email, u.name, u.location, u.phone, u.birth, u.image, u.isMonitor, u.announcement, u.schedule);
-                // });
             });
         };
 
@@ -718,9 +720,6 @@ require('./authentication/authentication.service.js');
     "use strict";
 
     var homePage = {
-        bindings: {
-            users: '<'
-        },
         templateUrl: "template/modules/home/home.html",
         controller: ['$scope', '$state', 'UserAPIService', 'AddressService', 'User', function ($scope, $state, UserAPIService, AddressService, User) {
             var self = this;
@@ -758,7 +757,7 @@ require('./search/search.js');
         controller: function ($scope, UserAPIService, DateTimeService, AddressService) {
             var self = this;
             var addressChanged = false;
-
+            console.log(self.user);
             self.onSubmit = function () {
                 updateUser();
             };
@@ -768,15 +767,17 @@ require('./search/search.js');
             };
 
             function updateUser() {
-                self.user.isMonitor = true;
+                if (self.user.roles.indexOf('Monitor') === -1) {
+                    self.user.roles.push('Monitor');
+                }
 
                 if (addressChanged) {
                     AddressService.getGooglePlace(self.user.announcement.location.address).then(function (location) {
-                        self.user.announcement.location = location;
-                        UserAPIService.update(self.user.id, _.pick(self.user, ['announcement', 'phone', 'isMonitor', 'schedule']));
+                        self.user.announcement.location = location.address;
+                        UserAPIService.update(self.user.id, _.pick(self.user, ['announcement', 'phone', 'roles', 'schedule']));
                     });
                 } else {
-                    UserAPIService.update(self.user.id, _.pick(self.user, ['announcement', 'phone', 'isMonitor', 'schedule']));
+                    UserAPIService.update(self.user.id, _.pick(self.user, ['announcement', 'phone', 'roles', 'schedule']));
                 }
             }
 
@@ -945,10 +946,6 @@ require('./search/search.js');
         templateUrl: 'template/modules/search/search.html',
         controller: function(){
             var self = this;
-
-            
-
-            console.log(self.result);
         }
     };
 

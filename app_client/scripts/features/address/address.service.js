@@ -32,7 +32,7 @@
                 if (result.data.status === "OK") {
                     var place = result.data.results[0];
                     var addressComponents = place.address_components;
-                    return new Address(
+                    var returnAddress = new Address(
                         address,
                         filterAddressComponent(addressComponents, STREET_NUMBER_TYPE),
                         filterAddressComponent(addressComponents, STREET_TYPE),
@@ -44,8 +44,16 @@
                         place.geometry.location.lat,
                         place.geometry.location.lng
                     );
+
+                    return {
+                        address: returnAddress,
+                        viewport: place.geometry.viewport
+                    };
                 }
-                return new Address(address);
+                return {
+                    address: new Address(address),
+                    viewport: null
+                };
             });
         };
 

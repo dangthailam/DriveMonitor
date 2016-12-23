@@ -1,55 +1,87 @@
 const mongoose = require('mongoose');
-const User = mongoose.model('User');
-const Address = mongoose.model('Address');
 const _ = require('lodash');
 const fs = require('fs');
-const Promise = require('bluebird');
+
+const User = mongoose.model('User');
+const Authentication = mongoose.model('Authentication');
+const Address = mongoose.model('Address');
+
+function handleError(res, err) {
+    res.status(400).json(err);
+    return;
+}
 
 var create = function (req, res) {
-    var user = new User();
-    user.name = req.body.name;
-    user.email = req.body.email;
-    user.setPassword(req.body.password);
-    user.save(function (err) {
-        var token;
-        token = user.generateJwt();
-        res.status(200);
-        res.json({
-            "token": token
+    Role.findOne({
+        name: "User"
+    }, function (err, role) {
+        if (err) return handleError(res, err);
+
+        var authentication = new Authentication();
+        authentication.email = req.body.email;
+        authentication.roles.push(role._id);
+        authentication.setPassword(req.body.password);
+
+        authentication.save(function (err) {
+            if (err) return handleError(res, err);
+
+            var user = new User();
+            user.name = req.body.name;
+            user.email = authentication.email;
+            user.authentication = authentication._id;
+            user.save(function (err) {
+                if (err) return handleError(res, err);
+                var token;
+                token = user.generateJwt();
+                res.status(200).json({
+                    "token": token
+                });
+            });
         });
     });
+
 };
 
+
+
 var findById = function (req, res) {
-    User.findById(req.params.userId).populate('announcement.location').exec(function (err, user) {
-        if (err) {
-            res.status(400).json(err);
-            return;
-        }
-        res.status(200).json(user.export());
+    var userQuery = User.findById(req.params.userId).populate('announcement.location');
+    if (req.query.authenticationIncluded) {
+        userQuery.populate('authentication');
+    }
+    userQuery.exec(function (err, user) {
+        if (err) return handleError(res, err);
+        res.status(200).json(user);
     });
 };
 
 var update = function (req, res) {
     User.findById(req.params.userId, function (err, user) {
-        if (err) {
-            res.status(400).json(err);
-            return;
-        }
+        if (err) return handleError(res, err);
 
         if (_.has(req.body, 'announcement')) {
             if (!user.announcement || !user.announcement.location) {
                 var address = new Address(req.body.announcement.location);
                 address.save(function (err) {
+                    if (err) return handleError(res, err);
                     user.announcement.location = address._id;
+                    for (var prop in req.body.announcement) {
+                        if (prop !== 'location')
+                            user.announcement[prop] = req.body.announcement[prop];
+                    }
                     saveUser(req, res, user);
                 });
             } else {
                 Address.findById(user.announcement.location, function (err, addr) {
+                    if (err) return handleError(res, err);
                     for (var prop in req.body.announcement.location) {
                         addr[prop] = req.body.announcement.location[prop];
                     }
                     addr.save(function (err) {
+                        for (var prop in req.body.announcement) {
+                            if (prop !== 'location')
+                                user.announcement[prop] = req.body.announcement[prop];
+                        }
                         saveUser(req, res, user);
                     });
                 });
@@ -67,11 +99,8 @@ function saveUser(req, res, user) {
     }
 
     user.save(function (err) {
-        if (err) {
-            res.status(400).json(err);
-            return;
-        }
-        res.status(200).json(user.export());
+        if (err) return handleError(res, err);
+        res.status(200).json(user);
     });
 }
 
@@ -89,9 +118,7 @@ var getMany = function (req, res) {
         var geoLongtitude = req.query.geoLongtitude;
         searchUsers(res, pageNumber, quantityPerPage, geoLatitude, geoLongtitude, country, region, department, city, street);
     } else {
-        var quantity = req.query.quantity ? parseInt(req.query.quantity) : null;
-        var isMonitor = req.query.isMonitor;
-        getUsers(res, quantity, isMonitor);
+        getUsers(req, res);
     }
 };
 
@@ -165,59 +192,36 @@ function findUserByAddress(res, addresses, count) {
             })
         }
     }, function (err, users) {
-        var returnUsers = _.map(users, function (u) {
-            return u.export();
-        });
         res.status(200).json({
-            users: returnUsers,
+            users: users,
             total: count,
             found: count > 0 ? true : false
         });
     });
 }
 
-function getUsers(res, quantity, isMonitor) {
-    if (isMonitor === null || isMonitor === undefined) {
-        users = User.find({}).populate('announcement.location');
-    } else {
-        users = User.find({
-            'isMonitor': isMonitor
-        }).populate('announcement.location');
-    }
-    if (quantity) {
-        users = users.limit(quantity);
-    }
+function getUsers(req, res) {
+    var users = User.find({}).populate('announcement.location');
 
     users.exec(function (err, users) {
-        if (err) {
-            res.status(400).json(err);
-            return;
-        }
-        res.status(200).json(_.map(users, function (u) {
-            return u.export();
-        }));
+        if (err) return handleError(err);
+        res.status(200).json(users);
     });
 }
 
 var updateProfilePicture = function (req, res) {
-    User.findById(req.params.userId, function (err, user) {
-        if (err) {
-            res.status(400).json(err);
-            return;
-        }
+    User.findById(req.params.userId).populate('authentication').exec(function (err, user) {
+        if (err) return handleError(err);
 
         var filePath = req.files.file.path;
 
-        user.image.data = fs.readFileSync(filePath);
-        user.image.contentType = req.files.file.type;
-        user.image.fileName = req.files.file.name;
+        user.authentication.image.data = fs.readFileSync(filePath);
+        user.authentication.image.contentType = req.files.file.type;
+        user.authentication.image.fileName = req.files.file.name;
 
-        user.save(function (err) {
-            if (err) {
-                res.status(400).json(err);
-                return;
-            }
-            res.status(200).json(user.export());
+        user.authentication.save(function (err) {
+            if (err) return handleError(res, err);
+            res.status(200).json(user);
         });
     });
 };
