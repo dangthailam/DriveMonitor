@@ -29,7 +29,6 @@
             }).then(function (result) {
                 var u = result.data;
                 var user = new User(u._id, u.email, u.name, u.roles, u.announcement, u.schedule, u.authentication);
-                console.log(user, u);
                 return user;
             });
         };

@@ -11,7 +11,10 @@
                 self.isLoggedIn = AuthenticationService.isLoggedIn();
                 self.loggedInUser = AuthenticationService.getCurrentUser();
             });
-            self.isLoggedIn = AuthenticationService.isLoggedIn();
+
+            self.$onInit = function () {
+                self.isLoggedIn = AuthenticationService.isLoggedIn();
+            };
         }
     };
 

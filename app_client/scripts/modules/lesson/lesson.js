@@ -7,7 +7,7 @@
         controller: function ($scope, UserAPIService, DateTimeService, AddressService) {
             var self = this;
             var addressChanged = false;
-            console.log(self.user);
+
             self.onSubmit = function () {
                 updateUser();
             };

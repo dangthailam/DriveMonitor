@@ -16,7 +16,11 @@
                 if (authentication) {
                     this.phone = authentication.phone;
                     this.birth = authentication.birth;
-                    this.imageUrl = (authentication.image && authentication.image.data) ? 'data:' + authentication.image.contentType + ';base64,' + authentication.image.data : defaultPhotoUrl;
+                    this.imageUrl = defaultPhotoUrl;
+                    if (authentication.image && authentication.image.data) {
+                        var base64 = new Buffer(authentication.image.data.data).toString('base64');
+                        this.imageUrl = 'data:' + authentication.image.contentType + ';base64,' + base64;
+                    }
                 }
             }
         }
