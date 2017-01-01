@@ -14,7 +14,7 @@
             };
 
             self.onStarHover = function (star) {
-                if(!self.canEdit) return;
+                if (!self.canEdit) return;
                 for (var i = 0; i < star.value; i++) {
                     self.stars[i].status = 'checked';
                 }
@@ -23,9 +23,9 @@
                 }
             };
 
-            self.onStarLeave = function(){
-                if(!self.canEdit) return;
-                init();   
+            self.onStarLeave = function () {
+                if (!self.canEdit) return;
+                init();
             };
 
             self.rate = function (value) {

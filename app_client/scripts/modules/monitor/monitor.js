@@ -11,9 +11,16 @@
 
             self.reserve = function () {
                 UserService.setMonitor(self.monitor);
-                $state.go('app.reserve', {
-                    monitorId: self.monitor.id
-                });
+                if (AuthenticationService.isLoggedIn()) {
+                    $state.go('app.reserve', {
+                        monitorId: self.monitor.id
+                    });
+                } else {
+                    $state.go('app.login', {
+                        return: '/reserve/' + self.monitor.id
+                    });
+                }
+
             };
 
             self.$onInit = function () {

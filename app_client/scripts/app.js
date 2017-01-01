@@ -84,7 +84,7 @@ angular.module('driveMonitor')
                 }]
             }
         }).state('app.reserve', {
-            url: "/reserve?monitorId",
+            url: "/reserve/:monitorId",
             template: "<reservation-page monitor='monitor'></reservation-page>",
             controller: ['$scope', 'monitor', function ($scope, monitor) {
                 $scope.monitor = monitor;
@@ -101,7 +101,7 @@ angular.module('driveMonitor')
             if (toState.forConnectedUser && !isLoggedIn) {
                 e.preventDefault();
                 $state.transitionTo('app.login', {
-                    return: toState.name ? toState.name : 'app.profile'
+                    return: toState.name ? toState.name : '/profile'
                 });
             }
         });

@@ -3,7 +3,7 @@
 
     var loginPage = {
         templateUrl: "template/modules/login/login.html",
-        controller: function ($scope, $state, $stateParams, UserAPIService, AuthenticationService) {
+        controller: function ($scope, $location, $stateParams, UserAPIService, AuthenticationService) {
             var self = this;
 
             self.credentials = {
@@ -13,7 +13,7 @@
 
             self.$onInit = function () {
                 if (AuthenticationService.isLoggedIn()) {
-                    $state.go('app.home');
+                    $location.url('/home');
                 }
             };
 
@@ -23,9 +23,9 @@
                         AuthenticationService.setCurrentUser(user);
                         $scope.$emit('onCheckAuthentication');
                         if ($stateParams.return) {
-                            $state.go($stateParams.return, $stateParams.params);
+                            $location.url($stateParams.return);
                         } else {
-                            $state.go('app.home');
+                            $location.url('/home');
                         }
                     });
                 });
