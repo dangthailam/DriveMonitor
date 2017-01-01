@@ -1,6 +1,7 @@
 (function () {
     require('./address.model');
     require('./authentication.model');
+    require('./reservation.model');
 
     const mongoose = require('mongoose');
     const jwt = require('jsonwebtoken');
@@ -9,15 +10,6 @@
         authentication: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Authentication'
-        },
-        email: {
-            type: String,
-            unique: true,
-            required: true
-        },
-        name: {
-            type: String,
-            required: true
         },
         roles: {
             type: [{
@@ -42,7 +34,31 @@
                 startIndex: Number,
                 endIndex: Number
             }]
+        }],
+        createdAt: Date,
+        updatedAt: Date,
+        reservationAsStudent: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Reservation'
+        }],
+        reservationAsMonitor: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Reservation'
         }]
+    });
+
+    userSchema.pre('save', function (next) {
+        // get the current date
+        var currentDate = new Date();
+
+        // change the updated_at field to current date
+        this.updatedAt = currentDate;
+
+        // if created_at doesn't exist, add to that field
+        if (!this.createdAt)
+            this.createdAt = currentDate;
+
+        next();
     });
 
     userSchema.methods.generateJwt = function () {
@@ -51,8 +67,6 @@
 
         return jwt.sign({
             _id: this._id,
-            email: this.email,
-            name: this.name,
             exp: parseInt(expiry.getTime() / 1000),
         }, "MY_SECRET"); // DO NOT KEEP YOUR SECRET IN THE CODE!
     };

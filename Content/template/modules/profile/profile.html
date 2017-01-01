@@ -22,7 +22,7 @@
                             <legend>Information Générale</legend>
                             <div class="row">
                                 <div class="col-lg-4 text-lg-center">
-                                    <img class="rounded-circle user-avatar-edit" src="{{$ctrl.user.imageUrl}}" alt="" />
+                                    <img class="rounded-circle user-avatar-edit" src="{{$ctrl.user.authentication.imageUrl}}" alt="" />
                                     <div class="row">
                                         <div class="col-xs-12">
                                             <a href="#" data-toggle="modal" data-target="#myModal">
@@ -35,43 +35,21 @@
                                     <div class="form-group row">
                                         <label for="email" class="col-lg-3 col-form-label">Email</label>
                                         <div class="col-lg-9">
-                                            <input type="email" class="form-control" disabled="disabled" id="email" placeholder="Enter email" ng-model="$ctrl.user.email">
+                                            <input type="email" class="form-control" disabled="disabled" id="email" placeholder="Enter email" ng-model="$ctrl.user.authentication.email">
                                         </div>
                                     </div>
                                     <div class="form-group row">
                                         <label for="name" class="col-lg-3 col-form-label">Nom et prénom</label>
                                         <div class="col-lg-9">
-                                            <input type="text" class="form-control" id="name" placeholder="Name" ng-model="$ctrl.user.name">
+                                            <input type="text" class="form-control" id="name" placeholder="Name" ng-model="$ctrl.user.authentication.name">
                                         </div>
                                     </div>
                                     <div class="form-group row">
                                         <label for="phone" class="col-lg-3 col-form-label">Phone</label>
                                         <div class="col-lg-9">
-                                            <input type="text" class="form-control" id="phone" placeholder="Numero de telephone" ng-model="$ctrl.user.phone">
+                                            <input type="text" class="form-control" id="phone" placeholder="Numero de telephone" ng-model="$ctrl.user.authentication.phone">
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </fieldset>
-                        <hr>
-                        <fieldset class="form-group">
-                            <legend>Votre adresse</legend>
-                            <div class="form-group row">
-                                <label for="number" class="col-lg-2 col-form-label">Adresse</label>
-                                <div class="col-lg-10">
-                                    <input type="text" class="form-control" id="number" placeholder="Numero de votre logement" ng-model="$ctrl.user.location.address">
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label for="city" class="col-lg-2 col-form-label">Ville</label>
-                                <div class="col-lg-10">
-                                    <input type="text" class="form-control" id="city" placeholder="Ville" ng-model="$ctrl.user.location.city">
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label for="postal" class="col-lg-2 col-form-label">Code postal</label>
-                                <div class="col-lg-10">
-                                    <input type="text" class="form-control" id="postal" placeholder="Code postal" ng-model="$ctrl.user.location.postal">
                                 </div>
                             </div>
                         </fieldset>
@@ -110,9 +88,6 @@
                                 <img class="rounded-circle croppedImg" ng-src="{{croppedDataUrl}}" />
                             </div>
                         </div>
-                    </div>
-                    <div class="progress" ng-show="progress >= 0">
-                        <div style="width:{{progress}}%" ng-bind="progress + '%'"></div>
                     </div>
                     <span ng-show="result">Upload Successful</span>
                     <span class="err" ng-show="errorMsg">{{errorMsg}}</span>

@@ -1,0 +1,50 @@
+<div class="container" id="reservation-page">
+    <div class="row">
+        <div class="col-lg-10 offset-lg-1 connection-form">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="page-title-container">
+                        <h2 class="page-title">Reservation</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-2 text-lg-center">
+                    <img class="rounded-circle" src="{{$ctrl.monitor.authentication.imageUrl}}" alt="Card image cap">
+                </div>
+                <div class="col-lg-10">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <p>{{ $ctrl.monitor.authentication.name }}</p>
+                            <p ng-if="$ctrl.monitor.announcement && $ctrl.monitor.announcement.city">
+                                <i class="fa fa-map-marker" aria-hidden="true"></i>
+                                <span>{{ $ctrl.monitor.announcement.city }} {{ $ctrl.monitor.announcement.postal }}</span>
+                            </p>
+                            <p ng-if="$ctrl.monitor.announcement.rate">
+                                <i class="fa fa-eur" aria-hidden="true"></i>
+                                <span>{{ $ctrl.monitor.announcement.rate }} / heure</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <form ng-submit="$ctrl.onSubmit()">
+                        <div class="form-group">
+                            <label for="email" class="control-label">Horaire</label>
+                            <button class="btn btn-default">Ajouter l'horaire</button>
+                        </div>
+                        <div class="form-group">
+                            <label for="password" class="control-label">Message</label>
+                            <textarea type="password" class="form-control" id="password" placeholder="Votre mot de passe" ng-model="$ctrl.credentials.password"></textarea>
+                        </div>
+                        <div class="text-lg-center">
+                            <button type="submit" class="btn btn-raised btn-primary">Valider</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -46,11 +46,15 @@ var create = function (req, res) {
 
 var findById = function (req, res) {
     var userQuery = User.findById(req.params.userId).populate('announcement.location');
-    if (req.query.authenticationIncluded) {
-        userQuery.populate('authentication');
+    if (req.query.populateProperties) {
+        userQuery.lean().populate(req.query.populateProperties);
     }
     userQuery.exec(function (err, user) {
         if (err) return handleError(res, err);
+        if (req.query.populateProperties.indexOf('authentication') != -1) {
+            delete user.authentication.hash;
+            delete user.authentication.salt;
+        }
         res.status(200).json(user);
     });
 };
@@ -162,7 +166,6 @@ function searchUsers(res, pageNumber, quantityPerPage, geoLatitude, geoLongtitud
 function suggestUsers(res, query, queryClue) {
     var params = {};
     var clues = ["country", "region", "department", "city"]; //no street
-
     var idx = _.findIndex(clues, function (c) {
         return c === queryClue;
     });
@@ -191,7 +194,12 @@ function findUserByAddress(res, addresses, count) {
                 return addr._id;
             })
         }
-    }, function (err, users) {
+    }).lean().populate('announcement.location authentication').exec(function (err, users) {
+        _.forEach(users, function(u){
+            delete u.authentication.hash;
+            delete u.authentication.salt;
+        });
+
         res.status(200).json({
             users: users,
             total: count,

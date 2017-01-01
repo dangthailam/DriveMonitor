@@ -14,7 +14,7 @@ angular.module('driveMonitor')
             resolve: {
                 loggedInUser: function (AuthenticationService, UserAPIService) {
                     if (AuthenticationService.isLoggedIn()) {
-                        return UserAPIService.getUser(AuthenticationService.getCurrentUser().id, true).then(function (user) {
+                        return UserAPIService.getUser(AuthenticationService.getCurrentUser().id, 'authentication').then(function (user) {
                             AuthenticationService.setCurrentUser(user);
                             return user;
                         });
@@ -26,20 +26,20 @@ angular.module('driveMonitor')
             url: "/",
             template: "<home-page></home-page>"
         }).state('app.login', {
-            url: "/login?return",
+            url: "/login?return&params",
             template: "<login-page></login-page>"
         }).state('app.register', {
             url: "/register",
             template: "<register-page></register-page>"
         }).state('app.monitor', {
             url: "/monitor/:userId",
-            template: "<monitor-page user='user'></monitor-page>",
-            controller: function ($scope, user) {
-                $scope.user = user;
+            template: "<monitor-page monitor='monitor'></monitor-page>",
+            controller: function ($scope, monitor) {
+                $scope.monitor = monitor;
             },
             resolve: {
-                user: function ($stateParams, UserAPIService) {
-                    return UserAPIService.getUser($stateParams.userId);
+                monitor: function ($stateParams, UserAPIService) {
+                    return UserAPIService.getUser($stateParams.userId, 'authentication');
                 }
             }
         }).state('app.profile', {
@@ -63,12 +63,16 @@ angular.module('driveMonitor')
                 $scope.result = result;
             },
             resolve: {
-                result: ['$stateParams', 'AddressService', 'UserAPIService', function ($stateParams, AddressService, UserAPIService) {
+                result: ['_', '$stateParams', 'AddressService', 'UserAPIService', 'User', function (_, $stateParams, AddressService, UserAPIService, User) {
                     if (!$stateParams.location) return null;
                     return AddressService.getGooglePlace($stateParams.location).then(function (location) {
                         return UserAPIService.search(location.address, 10, 1).then(function (result) {
                             return {
-                                searchResult: result.data,
+                                found: result.data.found,
+                                total: result.data.total,
+                                users: _.map(result.data.users, function (u) {
+                                    return new User(u);
+                                }),
                                 geocode: {
                                     latitude: location.address.geoLatitude,
                                     longtitude: location.address.geoLongtitude
@@ -77,6 +81,17 @@ angular.module('driveMonitor')
                             };
                         });
                     });
+                }]
+            }
+        }).state('app.reserve', {
+            url: "/reserve?monitorId",
+            template: "<reservation-page monitor='monitor'></reservation-page>",
+            controller: ['$scope', 'monitor', function ($scope, monitor) {
+                $scope.monitor = monitor;
+            }],
+            resolve: {
+                monitor: ['$stateParams', 'UserService', function ($stateParams, UserService) {
+                    return UserService.getMonitor($stateParams.monitorId);
                 }]
             }
         });

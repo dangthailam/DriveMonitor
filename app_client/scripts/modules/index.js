@@ -6,3 +6,4 @@ require('./profile/profile.js');
 require('./monitor/monitor.js');
 require('./lesson/lesson.js');
 require('./search/search.js');
+require('./reservation/reservation.js');

@@ -3,36 +3,41 @@
 </div>
 <div class="container" id="monitor-profile-page">
     <div class="row">
-        <div class="col-lg-10 offset-lg-1 col-md-8 col-sm-12" id="monitor-profile-description">
+        <div class="col-lg-12 col-md-8 col-sm-12 container-margin-top">
             <div class="row">
-                <div class="col-lg-2 text-lg-center">
-                    <img class="rounded-circle" src="{{$ctrl.avatarUrl}}"
-                        alt="Card image cap">
+                <div class="col-lg-2">
+                    <div class="monitor-image-container">
+                        <img class="rounded-top" src="{{$ctrl.monitor.authentication.imageUrl}}" alt="Card image cap">
+                        <div class="profile-content">
+                            <div class="monitor-name">
+                                {{ $ctrl.monitor.authentication.name }}
+                            </div>
+                            <div class="monitor-rating">
+                                <rating-system></rating-system>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="monitor-announcement-container">
+                        <p ng-if="$ctrl.monitor.announcement && $ctrl.monitor.announcement.location">
+                            <i class="fa fa-map-marker" aria-hidden="true"></i>
+                            <span>{{ $ctrl.monitor.announcement.location.city }}, {{ $ctrl.monitor.announcement.location.country }}</span>
+                        </p>
+                        <p ng-if="$ctrl.monitor.announcement.rate">
+                            <i class="fa fa-eur" aria-hidden="true"></i>
+                            <span>{{ $ctrl.monitor.announcement.rate }} / heure</span>
+                        </p>
+                    </div>
                 </div>
-                <div class="col-lg-10">
+                <div class="col-lg-7 connection-form">
                     <div class="row">
                         <div class="col-lg-8">
-                            <h1>{{ $ctrl.user.name }}</h1>
-                            <p ng-if="$ctrl.user.announcement && $ctrl.user.announcement.city">
-                                <i class="fa fa-map-marker" aria-hidden="true"></i>
-                                <span>{{ $ctrl.user.announcement.city }} {{ $ctrl.user.announcement.postal }}</span>
-                            </p>
-                            <p ng-if="$ctrl.user.announcement.rate">
-                                <i class="fa fa-eur" aria-hidden="true"></i>
-                                <span>{{ $ctrl.user.announcement.rate }} / heure</span>
-                            </p>
-                        </div>
-                        <div class="col-lg-4">
-                            <button class="btn btn-raised btn-primary btn-block">Réserver un cours</button>
-                            <button class="btn btn-raised btn-default btn-block">Contacter moniteur</button>
+                            <p>{{ $ctrl.monitor.announcement.description }}</p>
                         </div>
                     </div>
                 </div>
-            </div>
-            <hr>
-            <div class="row">
-                <div class="col-lg-12">
-                    <p>{{ $ctrl.user.announcement.description }}</p>
+                <div class="col-lg-3">
+                    <button type="button" ng-click="$ctrl.reserve()" class="btn btn-raised btn-primary btn-block">Réserver un cours</button>
+                    <button type="button" ng-click="$ctrl.contact()" class="btn btn-raised btn-default btn-block">Contacter moniteur</button>
                 </div>
             </div>
         </div>

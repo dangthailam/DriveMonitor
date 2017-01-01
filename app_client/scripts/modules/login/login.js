@@ -19,11 +19,11 @@
 
             self.onSubmit = function () {
                 AuthenticationService.login(self.credentials).then(function () {
-                    UserAPIService.getUser(AuthenticationService.getCurrentUser().id).then(function (user) {
+                    UserAPIService.getUser(AuthenticationService.getCurrentUser().id, 'authentication').then(function (user) {
                         AuthenticationService.setCurrentUser(user);
                         $scope.$emit('onCheckAuthentication');
                         if ($stateParams.return) {
-                            $state.go($stateParams.return);
+                            $state.go($stateParams.return, $stateParams.params);
                         } else {
                             $state.go('app.home');
                         }

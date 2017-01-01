@@ -29,7 +29,9 @@
             var payload = token.split('.')[1];
             payload = $window.atob(payload);
             payload = JSON.parse(payload);
-            _currentUser = _currentUser || new User(payload._id, payload.email, payload.name);
+            _currentUser = _currentUser || new User({
+                _id: payload._id
+            });
             return payload;
         }
 
@@ -51,6 +53,14 @@
             _currentUser = null;
         };
 
+        var update = function(authId, authentication){
+            return $http({
+                method: 'PATCH',
+                url: '/authentications/' + authId,
+                data: authentication
+            });
+        };
+
         return {
             saveToken: saveToken,
             getToken: getToken,
@@ -59,7 +69,8 @@
             login: login,
             logout: logout,
             setCurrentUser: setCurrentUser,
-            getCurrentUser: getCurrentUser
+            getCurrentUser: getCurrentUser,
+            update: update
         };
     };
 

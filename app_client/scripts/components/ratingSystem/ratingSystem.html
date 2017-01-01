@@ -1,0 +1,6 @@
+<span class="rating" ng-class="{'editable': $ctrl.canEdit}" ng-mouseleave="$ctrl.onStarLeave()">
+    <span ng-repeat="star in $ctrl.stars" 
+        class="{{star.status}}"
+        ng-click="$ctrl.rateMonitor(star)"
+        ng-mouseover="$ctrl.onStarHover(star)"></span>
+</span>

@@ -14,11 +14,6 @@
                 AuthenticationService.logout();
                 $scope.$emit('onCheckAuthentication');
             };
-
-            self.$onInit = function(){
-                console.log(self.isLoggedIn);
-                console.log(self.loggedInUser);
-            };
         }
     };
 

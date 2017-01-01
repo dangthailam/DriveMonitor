@@ -1,0 +1,22 @@
+.rating {
+    unicode-bidi: bidi-override;
+    & span {
+        font-family: FontAwesome;
+        font-weight: normal;
+        font-style: normal;
+        display: inline-block;
+        &.unchecked:before {
+            content: "\f006";
+            padding-right: 5px;
+            color: white;
+        }
+        &.checked:before{
+            content: "\f005";
+            padding-right: 5px;
+            color: #e3cf7a;
+        }
+    }
+    &.editable span {
+        cursor: pointer;
+    }
+}

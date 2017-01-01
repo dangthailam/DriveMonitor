@@ -1,9 +1,50 @@
-<div class="container-fluid" id="lesson">
+<div class="container container-margin-top" id="search-page">
     <div class="row">
-        <div class="col-lg-4 connection-form">
-            <div class="row" ng-repeat="user in $ctrl.result.searchResult.users">
-                <div class="col-lg-12">
-                    {{user.name}}
+        <div class="col-xs-12 col-lg-9">
+            <div class="form-group">
+                <label class="sr-only" for="exampleInputEmail2">Email address</label>
+                <input required type="text" class="form-control" id="exampleInputEmail2" placeholder="Location" ng-model="$ctrl.location"
+                    google-place>
+            </div>
+        </div>
+        <div class="col-xs-12 col-lg-3 nopadding">
+            <div class="form-group">
+                <button type="submit" name="button" class="btn btn-block btn-raised btn-primary">Chercher moniteur</button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="map-google" google-map users="$ctrl.result.searchResult.users" viewport="$ctrl.result.viewport" center-position="$ctrl.result.geocode"></div>
+        </div>
+        <div class="col-lg-9 connection-form">
+            <div class="row monitor-row" ng-repeat="user in $ctrl.result.users">
+                <div class="col-sm-2 text-sm-center">
+                    <a ui-sref="app.monitor({userId: user.id})">
+                        <img class="rounded-circle monitor-avatar" src="{{user.authentication.imageUrl}}" alt="" />
+                    </a>
+                </div>
+                <div class="col-sm-7">
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <h4>{{ user.authentication.name }}</h4>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <p>{{ user.announcement.title }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <button class="btn btn-success btn-sm">
+                                <i class="fa fa-calendar" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-3 text-sm-center">
+                    <h4>{{ user.announcement.rate }} €/h</h4>
                 </div>
             </div>
             <hr>
@@ -12,8 +53,8 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-8 float-lg-right map-google-container">
+        <!--<div class="col-lg-8 float-lg-right map-google-container">
             <div class="map-google" google-map users="$ctrl.result.searchResult.users" viewport="$ctrl.result.viewport" center-position="$ctrl.result.geocode"></div>
-        </div>
+        </div>-->
     </div>
 </div>

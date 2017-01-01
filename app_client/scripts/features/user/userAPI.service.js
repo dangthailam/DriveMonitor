@@ -14,21 +14,21 @@
                 }
             }).then(function (result) {
                 return _.map(result.data, function (u) {
-                    return new User(u._id, u.email, u.name, u.roles, u.announcement, u.schedule, u.authentication);
+                    return new User(u);
                 });
             });
         };
 
-        var getUser = function (userId, authenticationIncluded) {
+        var getUser = function (userId, populateProperties) {
             return $http({
                 url: '/users/' + userId,
                 method: "GET",
                 params: {
-                    authenticationIncluded: authenticationIncluded
+                    populateProperties: populateProperties
                 }
             }).then(function (result) {
                 var u = result.data;
-                var user = new User(u._id, u.email, u.name, u.roles, u.announcement, u.schedule, u.authentication);
+                var user = new User(u);
                 return user;
             });
         };

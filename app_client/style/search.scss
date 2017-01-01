@@ -17,13 +17,28 @@
     }
 }
 
-.map-google-container {
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    left: auto;
-    top: 77px;
-    .map-google {
-        height: 100%;
+.map-google {
+    height: 210px;
+    width: 210px;
+}
+
+#search-page {
+    .monitor-row {
+        cursor: pointer;
+    }
+    .monitor-avatar {
+        height: 116px;
+        width: 116px;
+    }
+    .calendar-container {
+        background-color: green;
+        width: 50px;
+        height: 50px;
+    }
+    .monitor-price {
+        .price {
+            color: #1e1e1e;
+            font-weight: 600;
+        }
     }
 }

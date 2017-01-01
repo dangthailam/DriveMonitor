@@ -3,16 +3,23 @@
 
     var monitorPage = {
         bindings: {
-            user: '<'
+            monitor: '<'
         },
         templateUrl: "template/modules/monitor/monitor.html",
-        controller: function ($location, UserAPIService) {
+        controller: ['$state', 'UserService', 'UserAPIService', 'AuthenticationService', function ($state, UserService, UserAPIService, AuthenticationService) {
             var self = this;
 
-            self.avatarUrl = self.user.image && self.user.image.data ?
-                'data:' + self.user.image.contentType + ';base64,' + self.user.image.data :
-                'http://media.npr.org/assets/news/2009/10/27/facebook1_sq-17f6f5e06d5742d8c53576f7c13d5cf7158202a9.jpg?s=16';
-        }
+            self.reserve = function () {
+                UserService.setMonitor(self.monitor);
+                $state.go('app.reserve', {
+                    monitorId: self.monitor.id
+                });
+            };
+
+            self.$onInit = function () {
+                console.log(self.monitor);
+            };
+        }]
     };
 
     angular.module('driveMonitor').component('monitorPage', monitorPage);

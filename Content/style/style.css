@@ -5366,7 +5366,6 @@ img-crop canvas {
 
 .connection-form {
   padding: 20px;
-  margin-top: 20px;
   border: 1px solid #ccc;
   background-color: white; }
 
@@ -5382,8 +5381,21 @@ img-crop canvas {
     border: 1px solid #ccc;
     background-color: white; }
   #monitor-profile-page img {
-    height: 100px;
-    width: 100px; }
+    height: 150px;
+    width: 100%; }
+  #monitor-profile-page div.monitor-image-container {
+    position: relative; }
+    #monitor-profile-page div.monitor-image-container div.profile-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      color: white;
+      background: rgba(0, 0, 0, 0.5);
+      padding-left: 20px; }
+  #monitor-profile-page div.monitor-announcement-container {
+    margin-top: 20px;
+    padding-left: 20px; }
 
 img.user-avatar-edit {
   height: 150px;
@@ -5407,6 +5419,28 @@ nav#navigate {
 nav img.user-avatar {
   width: 40px;
   height: 40px; }
+
+.rating {
+  unicode-bidi: bidi-override; }
+  .rating span {
+    font-family: FontAwesome;
+    font-weight: normal;
+    font-style: normal;
+    display: inline-block; }
+    .rating span.unchecked:before {
+      content: "\f006";
+      padding-right: 5px;
+      color: white; }
+    .rating span.checked:before {
+      content: "\f005";
+      padding-right: 5px;
+      color: #e3cf7a; }
+  .rating.editable span {
+    cursor: pointer; }
+
+#reservation-page img {
+  width: 100px;
+  height: 100px; }
 
 .schedule-edit {
   width: 100%;
@@ -5497,14 +5531,25 @@ nav img.user-avatar {
     background-color: white;
     border: 1px solid #ccc; }
 
-.map-google-container {
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  left: auto;
-  top: 77px; }
-  .map-google-container .map-google {
-    height: 100%; }
+.map-google {
+  height: 210px;
+  width: 210px; }
+
+#search-page .monitor-row {
+  cursor: pointer; }
+
+#search-page .monitor-avatar {
+  height: 116px;
+  width: 116px; }
+
+#search-page .calendar-container {
+  background-color: green;
+  width: 50px;
+  height: 50px; }
+
+#search-page .monitor-price .price {
+  color: #1e1e1e;
+  font-weight: 600; }
 
 body {
   background-color: #f0f0f0;
@@ -5523,3 +5568,9 @@ img.logo {
 #home-users img.card-img-top {
   width: 175px;
   height: 175px; }
+
+.container-margin-top {
+  margin-top: 20px; }
+
+.nopadding {
+  padding: 0 !important; }
