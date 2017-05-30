@@ -6,12 +6,12 @@
             monitor: '<'
         },
         templateUrl: "template/modules/monitor/monitor.html",
-        controller: ['$state', 'UserService', 'UserAPIService', 'AuthenticationService', function ($state, UserService, UserAPIService, AuthenticationService) {
+        controller: ['$state', 'UserService', 'UserAPIService', function ($state, UserAPIService) {
             var self = this;
 
             self.reserve = function () {
                 UserService.setMonitor(self.monitor);
-                if (AuthenticationService.isLoggedIn()) {
+                if (UserService.isLoggedIn()) {
                     $state.go('app.reserve', {
                         monitorId: self.monitor.id
                     });

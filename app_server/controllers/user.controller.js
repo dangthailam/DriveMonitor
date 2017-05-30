@@ -12,49 +12,33 @@ function handleError(res, err) {
 }
 
 var create = function (req, res) {
-    Role.findOne({
-        name: "User"
-    }, function (err, role) {
+    var user = new User();
+    user.name = req.body.name;
+    user.email = req.body.email;
+    user.setPassword(req.body.password);
+    user.save(function (err) {
         if (err) return handleError(res, err);
-
-        var authentication = new Authentication();
-        authentication.email = req.body.email;
-        authentication.roles.push(role._id);
-        authentication.setPassword(req.body.password);
-
-        authentication.save(function (err) {
-            if (err) return handleError(res, err);
-
-            var user = new User();
-            user.name = req.body.name;
-            user.email = authentication.email;
-            user.authentication = authentication._id;
-            user.save(function (err) {
-                if (err) return handleError(res, err);
-                var token;
-                token = user.generateJwt();
-                res.status(200).json({
-                    "token": token
-                });
-            });
+        var token;
+        token = user.generateJwt();
+        res.status(200).json({
+            "token": token
         });
     });
-
 };
 
 
 
 var findById = function (req, res) {
     var userQuery = User.findById(req.params.userId).populate('announcement.location');
-    if (req.query.populateProperties) {
-        userQuery.lean().populate(req.query.populateProperties);
-    }
+    // if (req.query.populateProperties) {
+    //     userQuery.lean().populate(req.query.populateProperties);
+    // }
     userQuery.exec(function (err, user) {
         if (err) return handleError(res, err);
-        if (req.query.populateProperties.indexOf('authentication') != -1) {
-            delete user.authentication.hash;
-            delete user.authentication.salt;
-        }
+        // if (req.query.populateProperties.indexOf('authentication') != -1) {
+        //     delete user.authentication.hash;
+        //     delete user.authentication.salt;
+        // }
         res.status(200).json(user);
     });
 };
@@ -195,7 +179,7 @@ function findUserByAddress(res, addresses, count) {
             })
         }
     }).lean().populate('announcement.location authentication').exec(function (err, users) {
-        _.forEach(users, function(u){
+        _.forEach(users, function (u) {
             delete u.authentication.hash;
             delete u.authentication.salt;
         });
@@ -223,11 +207,11 @@ var updateProfilePicture = function (req, res) {
 
         var filePath = req.files.file.path;
 
-        user.authentication.image.data = fs.readFileSync(filePath);
-        user.authentication.image.contentType = req.files.file.type;
-        user.authentication.image.fileName = req.files.file.name;
+        user.image.data = fs.readFileSync(filePath);
+        user.image.contentType = req.files.file.type;
+        user.image.fileName = req.files.file.name;
 
-        user.authentication.save(function (err) {
+        user.save(function (err) {
             if (err) return handleError(res, err);
             res.status(200).json(user);
         });

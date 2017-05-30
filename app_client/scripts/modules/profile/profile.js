@@ -7,11 +7,13 @@
             user: '<'
         },
         templateUrl: "template/modules/profile/profile.html",
-        controller: function ($scope, $window, $timeout, Upload, AuthenticationService, UserAPIService) {
+        controller: function ($scope, $window, $timeout, Upload, UserService, UserAPIService) {
             var self = this;
 
+            console.log(self.user);
+
             self.onSubmit = function () {
-                AuthenticationService.update(self.user.authentication.id, _.pick(self.user.authentication, ['name', 'phone'])).then(function () {
+                UserAPIService.update(self.user.id, _.pick(self.user, ['name', 'phone'])).then(function () {
                     done();
                 });
             };

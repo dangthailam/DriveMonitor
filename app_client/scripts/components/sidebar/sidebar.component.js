@@ -7,11 +7,11 @@
             loggedInUser: '<'
         },
         templateUrl: "template/components/sidebar/sidebar.html",
-        controller: function ($scope, AuthenticationService) {
+        controller: function ($scope, UserService) {
             var self = this;
 
             self.logout = function () {
-                AuthenticationService.logout();
+                UserService.logout();
                 $scope.$emit('onCheckAuthentication');
             };
         }

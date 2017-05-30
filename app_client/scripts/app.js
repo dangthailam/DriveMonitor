@@ -12,10 +12,10 @@ angular.module('driveMonitor')
                 $scope.user = loggedInUser;
             },
             resolve: {
-                loggedInUser: function (AuthenticationService, UserAPIService) {
-                    if (AuthenticationService.isLoggedIn()) {
-                        return UserAPIService.getUser(AuthenticationService.getCurrentUser().id, 'authentication').then(function (user) {
-                            AuthenticationService.setCurrentUser(user);
+                loggedInUser: function (UserService, UserAPIService) {
+                    if (UserService.isLoggedIn()) {
+                        return UserAPIService.getUser(UserService.getCurrentUser().id).then(function (user) {
+                            UserService.setCurrentUser(user);
                             return user;
                         });
                     }
@@ -46,15 +46,15 @@ angular.module('driveMonitor')
             url: "/profile",
             template: "<profile-page user='user'></profile-page>",
             forConnectedUser: true,
-            controller: function ($scope, loggedInUser, AuthenticationService) {
-                $scope.user = AuthenticationService.getCurrentUser();
+            controller: function ($scope, loggedInUser, UserService) {
+                $scope.user = UserService.getCurrentUser();
             }
         }).state('app.lesson', {
             url: "/annonce",
             template: '<lesson-page user="user"></lesson-page>',
             forConnectedUser: true,
-            controller: function ($scope, loggedInUser, AuthenticationService) {
-                $scope.user = AuthenticationService.getCurrentUser();
+            controller: function ($scope, loggedInUser, UserService) {
+                $scope.user = UserService.getCurrentUser();
             }
         }).state('app.search', {
             url: "/search?location",
@@ -95,9 +95,9 @@ angular.module('driveMonitor')
                 }]
             }
         });
-    }).run(function ($rootScope, $state, AuthenticationService) {
+    }).run(function ($rootScope, $state, UserService) {
         $rootScope.$on('$stateChangeStart', function (e, toState, toParams) {
-            var isLoggedIn = AuthenticationService.isLoggedIn();
+            var isLoggedIn = UserService.isLoggedIn();
             if (toState.forConnectedUser && !isLoggedIn) {
                 e.preventDefault();
                 $state.transitionTo('app.login', {

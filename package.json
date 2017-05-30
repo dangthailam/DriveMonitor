@@ -8,7 +8,8 @@
   },
   "scripts": {
     "start": "node server.js",
-    "postinstall": "gulp default"
+    "postinstall": "gulp default",
+    "debug": "node --nolazy --debug-brk=5858 server.js"
   },
   "author": "",
   "license": "ISC",

@@ -21,46 +21,42 @@
                             <a class="nav-link" data-toggle="tab" href="#schedule" role="tab">Votre disponibilité</a>
                         </li>
                     </ul>
-                    <!-- Tab panes -->
-                    <div class="tab-content">
-                        <div class="tab-pane active" id="information" role="tabpanel">
-                            <hr>
-                            <form ng-submit="$ctrl.onSubmit()">
+                    <form ng-submit="$ctrl.onSubmit()">
+                        <!-- Tab panes -->
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="information" role="tabpanel">
+                                <hr>
                                 <div class="form-group">
-                                    <label for="email" class="control-label">Titre de l'annonce</label>
-                                    <input type="text" class="form-control" id="name" placeholder="Moniteur 5 ans d'expérience donne le cours de conduite" ng-model="$ctrl.user.announcement.title">
-                                </div>
-                                <div class="form-group">
-                                    <label for="email" class="control-label">Description</label>
-                                    <textarea class="form-control" rows="4" id="email" placeholder="Description de votre annonce" ng-model="$ctrl.user.announcement.description"></textarea>
+                                    <label for="title" class="control-label">Titre de l'annonce</label>
+                                    <input type="text" class="form-control" id="title" placeholder="Moniteur 5 ans d'expérience donne le cours de conduite" ng-model="$ctrl.user.announcement.title">
                                 </div>
                                 <div class="form-group">
-                                    <label for="email" class="control-label">Tarif</label>
-                                    <input type="text" class="form-control" id="name" placeholder="30€ de l'heure" ng-model="$ctrl.user.announcement.rate">
+                                    <label for="description" class="control-label">Description</label>
+                                    <textarea class="form-control" rows="4" id="description" placeholder="Description de votre annonce" ng-model="$ctrl.user.announcement.description"></textarea>
                                 </div>
                                 <div class="form-group">
-                                    <label for="email" class="control-label">Numéro de téléphone</label>
-                                    <input type="text" class="form-control" id="name" placeholder="Numéro de téléphone" ng-model="$ctrl.user.announcement.phone">
+                                    <label for="tarif" class="control-label">Tarif</label>
+                                    <input type="text" class="form-control" id="tarif" placeholder="30€ de l'heure" ng-model="$ctrl.user.announcement.rate">
                                 </div>
                                 <div class="form-group">
-                                    <label for="email" class="control-label">Adresse</label>
-                                    <input google-place type="text" class="form-control" id="name" placeholder="Adresse où vous donnez le cours" ng-change="$ctrl.addressChanged()" ng-model="$ctrl.user.announcement.location.address">
+                                    <label for="address" class="control-label">Adresse</label>
+                                    <input google-place type="text" class="form-control" id="address" placeholder="Adresse où vous donnez le cours" ng-change="$ctrl.addressChanged()"
+                                        ng-model="$ctrl.user.announcement.location.address">
                                 </div>
-                                <div class="text-lg-center">
-                                    <button type="submit" class="btn btn-raised btn-primary">Valider</button>
+                            </div>
+                            <div class="tab-pane" id="schedule" role="tabpanel">
+                                <hr>
+                                <div class="row" ng-repeat="$ctrl.user.schedule">
+                                    <div class="col-lg-2"></div>
+                                    <div class="col-lg-2"></div>
+                                    <div class="col-lg-8"></div>
                                 </div>
-                            </form>
                         </div>
-                        <div class="tab-pane" id="schedule" role="tabpanel">
-                            <hr>
-                            <form ng-submit="$ctrl.onSubmit()">
-                                <schedule data-can-edit="true" schedule="$ctrl.user.schedule"></schedule>
-                                <div class="text-lg-center">
-                                    <button type="submit" class="btn btn-raised btn-primary">Valider</button>
-                                </div>
-                            </form>
                         </div>
-                    </div>
+                        <div class="text-lg-center">
+                            <button type="submit" class="btn btn-raised btn-primary">Valider</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

@@ -5,12 +5,29 @@
 
     const mongoose = require('mongoose');
     const jwt = require('jsonwebtoken');
+    var crypto = require('crypto');
+    var _ = require('lodash');
 
     var userSchema = new mongoose.Schema({
-        authentication: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Authentication'
+        email: {
+            type: String,
+            unique: true,
+            required: true
         },
+        name: String,
+        phone: String,
+        image: {
+            data: Buffer,
+            contentType: String,
+            fileName: String
+        },
+        birth: {
+            day: Number,
+            month: Number,
+            year: Number
+        },
+        hash: String,
+        salt: String,
         roles: {
             type: [{
                 type: String,
@@ -35,8 +52,6 @@
                 endIndex: Number
             }]
         }],
-        createdAt: Date,
-        updatedAt: Date,
         reservationAsStudent: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Reservation'
@@ -44,7 +59,16 @@
         reservationAsMonitor: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Reservation'
-        }]
+        }],
+        remoteSource: [{
+            sourceId: String,
+            source: {
+                type: String,
+                enum: ['Facebook', 'GPlus']
+            }
+        }],
+        createdAt: Date,
+        updatedAt: Date
     });
 
     userSchema.pre('save', function (next) {
@@ -60,6 +84,16 @@
 
         next();
     });
+
+    userSchema.methods.setPassword = function (password) {
+        this.salt = crypto.randomBytes(16).toString('hex');
+        this.hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64).toString('hex');
+    };
+
+    userSchema.methods.validPassword = function (password) {
+        var hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64).toString('hex');
+        return this.hash === hash;
+    };
 
     userSchema.methods.generateJwt = function () {
         var expiry = new Date();
