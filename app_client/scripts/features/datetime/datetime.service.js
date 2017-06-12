@@ -3,43 +3,77 @@
         var ticsPerDay = 60 * 60 * 24 * 1000;
 
         var getDayHours = function () {
-            var hours = [];
-            for (var i = 0; i < 24; i++) {
-                hours.splice(2 * i, 0, {
-                    hour: i,
-                    minute: 0,
-                    show: true
-                }, {
-                    hour: i,
-                    minute: 30,
-                    show: false
-                });
-            }
+            var hours = [
+                "06:00",
+                "06:30",
+                "07:00",
+                "07:30",
+                "08:00",
+                "08:30",
+                "09:00",
+                "09:30",
+                "10:00",
+                "10:30",
+                "11:00",
+                "11:30",
+                "12:00",
+                "12:30",
+                "13:00",
+                "13:30",
+                "14:00",
+                "14:30",
+                "15:00",
+                "15:30",
+                "16:00",
+                "16:30",
+                "17:00",
+                "17:30",
+                "18:00",
+                "18:30",
+                "19:00",
+                "19:30",
+                "20:00",
+                "20:30"
+            ];
             return hours;
         };
+
+        // var getDayHours = function () {
+        //     var hours = [];
+        //     for (var i = 6; i <= 20; i++) {
+        //         hours.splice(2 * i, 0, {
+        //             hour: i,
+        //             minute: 0
+        //         }, {
+        //             hour: i,
+        //             minute: 30
+        //         });
+        //     }
+        //     return hours;
+        // };
 
         var getWeekDays = function (date) {
             var daysOfWeek = [{
                 value: 0,
-                text: 'Lun'
+                text: 'Lundi'
             }, {
                 value: 1,
-                text: 'Mar'
+                text: 'Mardi'
             }, {
                 value: 2,
-                text: 'Mer'
+                text: 'Mercredi'
             }, {
                 value: 3,
-                text: 'Jeu'
+                text: 'Jeudi'
             }, {
                 value: 4,
-                text: 'Ven'
+                text: 'Vendredi'
             }, {
                 value: 5,
-                text: 'Sam'
+                text: 'Samedi'
             }, {
                 value: 6,
-                text: 'Dim'
+                text: 'Dimanche'
             }];
             return daysOfWeek;
         };
@@ -47,25 +81,25 @@
         var generateNewSchedule = function () {
             return [{
                 day: 0,
-                ranges: []
+                ranges: [{}]
             }, {
                 day: 1,
-                ranges: []
+                ranges: [{}]
             }, {
                 day: 2,
-                ranges: []
+                ranges: [{}]
             }, {
                 day: 3,
-                ranges: []
+                ranges: [{}]
             }, {
                 day: 4,
-                ranges: []
+                ranges: [{}]
             }, {
                 day: 5,
-                ranges: []
+                ranges: [{}]
             }, {
                 day: 6,
-                ranges: []
+                ranges: [{}]
             }];
         };
 

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Authentication = mongoose.model('Authentication');
+// const Authentication = mongoose.model('Authentication');
 
 function handleError(res, err) {
     res.status(400).json(err);
@@ -7,17 +7,17 @@ function handleError(res, err) {
 }
 
 var update = function (req, res) {
-    Authentication.findById(req.params.authId, function (err, authentication) {
-        if (err) return handleError(res, err);
-        for (var prop in req.body) {
-            authentication[prop] = req.body[prop];
-        }
+    // Authentication.findById(req.params.authId, function (err, authentication) {
+    //     if (err) return handleError(res, err);
+    //     for (var prop in req.body) {
+    //         authentication[prop] = req.body[prop];
+    //     }
 
-        authentication.save(function (err) {
-            if (err) return handleError(res, err);
-            res.status(200).json(authentication);
-        });
-    });
+    //     authentication.save(function (err) {
+    //         if (err) return handleError(res, err);
+    //         res.status(200).json(authentication);
+    //     });
+    // });
 };
 
 module.exports = {

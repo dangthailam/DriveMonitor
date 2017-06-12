@@ -1,6 +1,5 @@
 (function () {
     require('./address.model');
-    require('./authentication.model');
     require('./reservation.model');
 
     const mongoose = require('mongoose');
@@ -47,9 +46,10 @@
         },
         schedule: [{
             day: Number,
+            open: Boolean,
             ranges: [{
-                startIndex: Number,
-                endIndex: Number
+                startHour: String,
+                endHour: String
             }]
         }],
         reservationAsStudent: [{

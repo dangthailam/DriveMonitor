@@ -15,16 +15,16 @@
                     <!-- Nav tabs -->
                     <ul class="nav nav-tabs" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active" data-toggle="tab" href="#information" role="tab">Information</a>
+                            <a class="nav-link" data-toggle="tab" href="#information" role="tab">Information</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#schedule" role="tab">Votre disponibilité</a>
+                            <a class="nav-link active" data-toggle="tab" href="#schedule" role="tab">Votre disponibilité</a>
                         </li>
                     </ul>
                     <form ng-submit="$ctrl.onSubmit()">
                         <!-- Tab panes -->
                         <div class="tab-content">
-                            <div class="tab-pane active" id="information" role="tabpanel">
+                            <div class="tab-pane" id="information" role="tabpanel">
                                 <hr>
                                 <div class="form-group">
                                     <label for="title" class="control-label">Titre de l'annonce</label>
@@ -44,14 +44,42 @@
                                         ng-model="$ctrl.user.announcement.location.address">
                                 </div>
                             </div>
-                            <div class="tab-pane" id="schedule" role="tabpanel">
+                            <div class="tab-pane active" id="schedule" role="tabpanel">
                                 <hr>
-                                <div class="row" ng-repeat="$ctrl.user.schedule">
-                                    <div class="col-lg-2"></div>
-                                    <div class="col-lg-2"></div>
-                                    <div class="col-lg-8"></div>
+                                <div class="row">
+                                    <div class="col-lg-10 offset-lg-1">
+                                        <div class="row form-group" ng-repeat="schedule in $ctrl.user.schedule">
+                                            <div class="col-lg-2">{{ schedule.day | displayDate }}</div>
+                                            <div class="col-lg-3">
+                                                <input type="checkbox" ng-model="schedule.open">
+                                                <span>
+                                                    {{ schedule.open ? "Disponible" : "Pas disponible" }}
+                                                </span>
+                                            </div>
+                                            <div class="col-lg-7">
+                                                <div class="row form-group" ng-if="schedule.open" ng-repeat="range in schedule.ranges">
+                                                    <div class="col-lg-4">
+                                                        <select name="range-{{$index}}-startHour" id="range-{{$index}}-startHour" 
+                                                            ng-model="range.startHour" 
+                                                            class="form-control"
+                                                            ng-options="hour for hour in $ctrl.hours"></select>
+                                                    </div>
+                                                    <div class="col-lg-4">
+                                                        <select name="range-{{$index}}-endHour" id="range-{{$index}}-endHour" 
+                                                            ng-model="range.endHour" 
+                                                            class="form-control"
+                                                            ng-options="hour for hour in $ctrl.hours"></select>
+                                                    </div>
+                                                    <div class="col-lg-4">
+                                                        <button class="btn btn-default" ng-if="!$first" ng-click="schedule.ranges.splice($index, 1)">x</button>
+                                                        <button class="btn btn-success" ng-if="$last && range.startHour && range.endHour && schedule.ranges.length < 3" ng-click="schedule.ranges.push({})">+</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                        </div>
+                            </div>
                         </div>
                         <div class="text-lg-center">
                             <button type="submit" class="btn btn-raised btn-primary">Valider</button>

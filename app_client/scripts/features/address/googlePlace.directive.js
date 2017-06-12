@@ -7,7 +7,9 @@
             link: function (scope, element, attrs, model) {
                 var options = {
                     types: [],
-                    componentRestrictions: {}
+                    componentRestrictions: {
+                        country: 'fr'
+                    }
                 };
                 
                 var gPlace = new google.maps.places.Autocomplete(element[0], options);

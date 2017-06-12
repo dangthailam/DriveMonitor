@@ -3,7 +3,6 @@ const _ = require('lodash');
 const fs = require('fs');
 
 const User = mongoose.model('User');
-const Authentication = mongoose.model('Authentication');
 const Address = mongoose.model('Address');
 
 function handleError(res, err) {
@@ -35,10 +34,6 @@ var findById = function (req, res) {
     // }
     userQuery.exec(function (err, user) {
         if (err) return handleError(res, err);
-        // if (req.query.populateProperties.indexOf('authentication') != -1) {
-        //     delete user.authentication.hash;
-        //     delete user.authentication.salt;
-        // }
         res.status(200).json(user);
     });
 };
@@ -178,11 +173,11 @@ function findUserByAddress(res, addresses, count) {
                 return addr._id;
             })
         }
-    }).lean().populate('announcement.location authentication').exec(function (err, users) {
-        _.forEach(users, function (u) {
-            delete u.authentication.hash;
-            delete u.authentication.salt;
-        });
+    }).lean().populate('announcement.location').exec(function (err, users) {
+        // _.forEach(users, function (u) {
+        //     delete u.authentication.hash;
+        //     delete u.authentication.salt;
+        // });
 
         res.status(200).json({
             users: users,
@@ -202,7 +197,7 @@ function getUsers(req, res) {
 }
 
 var updateProfilePicture = function (req, res) {
-    User.findById(req.params.userId).populate('authentication').exec(function (err, user) {
+    User.findById(req.params.userId).exec(function (err, user) {
         if (err) return handleError(err);
 
         var filePath = req.files.file.path;

@@ -34,6 +34,8 @@
             self.$onInit = function () {
                 if (!self.user.schedule || !self.user.schedule.length)
                     self.user.schedule = DateTimeService.generateNewSchedule();
+
+                self.hours = DateTimeService.getDayHours();
             };
         }
     };
